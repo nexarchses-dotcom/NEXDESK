@@ -1108,7 +1108,7 @@ const Views = {
         ${svg('<circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="21" y1="21" x2="16.5" y2="16.5" stroke-width="2"/>')}
         <input id="kbSearch" placeholder="Search articles by symptom, equipment, or keyword…" oninput="Views._kbFilter(this.value)">
       </div>
-      <div class="kb-grid" id="kbGrid">${this._kbCards(KB)}</div>
+      <div class="kb-grid" id="kbGrid">${Views._kbCards(KB)}</div>
     </div>`;
   },
   _kbCards(list){ return list.length?list.map(k=>`
@@ -1118,7 +1118,7 @@ const Views = {
     </div>`).join('') : `<div class="empty" style="grid-column:1/-1">${svg(ICON.book)}<h4>No articles found</h4></div>`; },
   _kbFilter(q){ q=q.toLowerCase();
     const f=KB.filter(k=>(k.title+k.body+k.tags.join(' ')+k.cat).toLowerCase().includes(q));
-    document.getElementById('kbGrid').innerHTML=this._kbCards(f); },
+    document.getElementById('kbGrid').innerHTML=Views._kbCards(f); },
 
   /* ---------- CLIENTS ---------- */
   clients(){
