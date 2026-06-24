@@ -4,17 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#0B0E14">
-<meta name="description" content="NEXDESK — Technical support & ticketing operations console for NEXARCH Systems Engineering.">
-<title>NEXDESK · Support Operations Console</title>
+<meta name="description" content="NEXDESK — Raise a technical support ticket with NEXARCH Systems Engineering.">
+<title>NEXDESK · Raise a Support Ticket</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230B0E14'/><path d='M30 70V30h8l24 26V30h8v40h-8L38 44v26z' fill='%232DE2C0'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   NEXDESK — Operations Console
-   Design tokens: phosphor-teal signature on deep slate,
-   signal colors reserved strictly for ticket state.
+   NEXDESK — Raise a Support Ticket (public intake)
+   Operations Console design language — consistent with the app
 ============================================================ */
 :root{
   --void:#0B0E14; --panel:#131822; --panel-2:#1A2130; --panel-3:#222B3B;
@@ -25,7 +23,6 @@
   --crit-bg:rgba(255,77,94,.12); --high-bg:rgba(255,159,64,.12);
   --med-bg:rgba(255,210,63,.12); --low-bg:rgba(61,185,245,.12); --ok-bg:rgba(54,211,153,.12);
   --r:14px; --r-sm:9px; --r-lg:20px;
-  --sb:248px;
   --f-disp:'Chakra Petch',sans-serif; --f-body:'Inter',sans-serif; --f-mono:'JetBrains Mono',monospace;
   --sh:0 1px 0 rgba(255,255,255,.02) inset, 0 16px 40px rgba(0,0,0,.4);
 }
@@ -33,7 +30,7 @@
 html{-webkit-text-size-adjust:100%}
 body{
   font-family:var(--f-body);background:var(--void);color:var(--ink);
-  font-size:14px;line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+  font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;
   background-image:
     radial-gradient(900px 500px at 100% -10%, rgba(45,226,192,.06), transparent 60%),
     radial-gradient(700px 500px at -10% 110%, rgba(91,140,255,.05), transparent 60%);
@@ -47,460 +44,369 @@ a{color:inherit;text-decoration:none}
 ::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:20px;border:2px solid var(--void)}
 ::-webkit-scrollbar-track{background:transparent}
 
-/* ---------- App shell ---------- */
-#app{display:grid;grid-template-columns:var(--sb) 1fr;min-height:100vh}
-
-/* ---------- Sidebar ---------- */
-.sidebar{
-  position:fixed;inset:0 auto 0 0;width:var(--sb);background:var(--panel);
-  border-right:1px solid var(--line);display:flex;flex-direction:column;z-index:50;
-}
-.brand{display:flex;align-items:center;gap:11px;padding:20px 18px 18px;border-bottom:1px solid var(--line)}
+/* ---------- Topbar ---------- */
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:14px;
+  padding:14px 22px;background:rgba(11,14,20,.82);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px}
 .brand .logo{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,#16201d,#0f1318);
   border:1px solid var(--line-2);display:grid;place-items:center;flex:none;box-shadow:0 0 22px var(--teal-glow)}
 .brand .logo svg{width:22px;height:22px}
 .brand h1{font-family:var(--f-disp);font-size:18px;font-weight:700;letter-spacing:.5px;line-height:1}
 .brand .sub{font-family:var(--f-mono);font-size:9.5px;color:var(--teal);letter-spacing:2px;text-transform:uppercase;margin-top:3px}
-.nav{flex:1;padding:14px 12px;overflow-y:auto}
-.nav-label{font-family:var(--f-mono);font-size:9.5px;letter-spacing:2px;color:var(--faint);
-  text-transform:uppercase;padding:14px 12px 7px}
-.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r-sm);
-  color:var(--muted);font-weight:500;font-size:13.5px;position:relative;transition:.16s;margin-bottom:2px}
-.nav-item:hover{background:var(--panel-2);color:var(--ink)}
-.nav-item.active{background:linear-gradient(90deg,var(--teal-glow),transparent);color:var(--ink)}
-.nav-item.active::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:3px;
-  background:var(--teal);border-radius:0 3px 3px 0;box-shadow:0 0 12px var(--teal)}
-.nav-item svg{width:18px;height:18px;flex:none;stroke-width:1.9}
-.nav-item .badge{margin-left:auto;font-family:var(--f-mono);font-size:10.5px;background:var(--panel-3);
-  color:var(--muted);padding:2px 7px;border-radius:20px;min-width:22px;text-align:center}
-.nav-item.active .badge{background:var(--teal);color:#04130f;font-weight:700}
-.sb-foot{padding:12px;border-top:1px solid var(--line)}
-.user-card{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r-sm);background:var(--panel-2)}
-.avatar{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--teal-dim),#3a567f);
-  display:grid;place-items:center;font-family:var(--f-disp);font-weight:700;font-size:13px;color:#04130f;flex:none}
-.user-card .nm{font-size:12.5px;font-weight:600;line-height:1.2}
-.user-card .rl{font-size:10.5px;color:var(--muted)}
+.intake-pill{margin-left:6px;font-family:var(--f-mono);font-size:10px;letter-spacing:1.5px;color:var(--teal);
+  border:1px solid var(--teal-dim);background:var(--teal-glow);padding:4px 10px;border-radius:20px;text-transform:uppercase}
+.back-link{margin-left:auto;display:flex;align-items:center;gap:7px;color:var(--muted);font-size:13px;font-weight:500;
+  padding:8px 13px;border:1px solid var(--line);border-radius:var(--r-sm);transition:.16s}
+.back-link:hover{color:var(--ink);border-color:var(--line-2);background:var(--panel)}
+.back-link svg{width:15px;height:15px}
 
-/* ---------- Main column ---------- */
-.main{grid-column:2;display:flex;flex-direction:column;min-width:0}
-.topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:14px;
-  padding:13px 26px;background:rgba(11,14,20,.78);backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--line)}
-.menu-btn{display:none;width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
-  background:var(--panel);place-items:center}
-.menu-btn svg{width:20px;height:20px}
-.search{flex:1;max-width:440px;position:relative}
-.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--faint)}
-.search input{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:11px;
-  padding:10px 14px 10px 38px;color:var(--ink);outline:none;transition:.16s}
-.search input:focus{border-color:var(--teal-dim);box-shadow:0 0 0 3px var(--teal-glow)}
-.search input::placeholder{color:var(--faint)}
-.top-spacer{flex:1}
-.conn{display:flex;align-items:center;gap:7px;font-family:var(--f-mono);font-size:11px;color:var(--muted);
-  padding:7px 12px;border:1px solid var(--line);border-radius:20px;background:var(--panel)}
-.conn .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok)}
-.conn.offline .dot{background:var(--high);box-shadow:0 0 8px var(--high)}
-.conn.syncing .dot{background:var(--low);animation:pulse 1s infinite}
-@keyframes pulse{50%{opacity:.35}}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:11px;
-  font-weight:600;font-size:13.5px;transition:.16s;white-space:nowrap}
-.btn svg{width:17px;height:17px;stroke-width:2.1}
-.btn-primary{background:var(--teal);color:#04130f;box-shadow:0 6px 18px var(--teal-glow)}
-.btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
-.btn-ghost{background:var(--panel);border:1px solid var(--line);color:var(--ink)}
-.btn-ghost:hover{border-color:var(--line-2);background:var(--panel-2)}
-.btn-sm{padding:7px 12px;font-size:12.5px;border-radius:9px}
+/* ---------- Layout ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:30px 22px 70px}
+.eyebrow{font-family:var(--f-mono);font-size:11px;letter-spacing:2px;color:var(--teal);text-transform:uppercase;
+  display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--teal)}
+.page-title{font-family:var(--f-disp);font-size:30px;font-weight:700;letter-spacing:.3px}
+.page-sub{color:var(--muted);margin-top:7px;max-width:640px}
+.grid{display:grid;grid-template-columns:1fr 372px;gap:22px;margin-top:26px;align-items:start}
 
-/* ---------- View container ---------- */
-.view{padding:26px;max-width:1320px;width:100%;margin:0 auto;animation:fade .35s ease}
-@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.view-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
-.view-head h2{font-family:var(--f-disp);font-size:26px;font-weight:700;letter-spacing:.3px;line-height:1.1}
-.view-head .eyebrow{font-family:var(--f-mono);font-size:10.5px;letter-spacing:2.5px;color:var(--teal);
-  text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.view-head .eyebrow::before{content:"";width:18px;height:1px;background:var(--teal)}
-.view-head p{color:var(--muted);font-size:13.5px;margin-top:4px}
+/* ---------- Form panel ---------- */
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+.form-panel{padding:8px 0}
+.fset{padding:22px 24px;border-bottom:1px solid var(--line)}
+.fset:last-child{border-bottom:none}
+.fset-title{font-family:var(--f-mono);font-size:10.5px;letter-spacing:1.8px;text-transform:uppercase;
+  color:var(--teal);margin-bottom:16px;display:flex;align-items:center;gap:9px}
+.fset-title svg{width:15px;height:15px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.field.full{grid-column:1/-1}
+.field label{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.2px}
+.field label .req{color:var(--teal);margin-left:2px}
+.field input,.field select,.field textarea{
+  width:100%;background:var(--void);border:1px solid var(--line-2);border-radius:var(--r-sm);
+  color:var(--ink);padding:11px 13px;transition:.15s;outline:none}
+.field input::placeholder,.field textarea::placeholder{color:var(--faint)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal-dim);box-shadow:0 0 0 3px var(--teal-glow)}
+.field textarea{resize:vertical;min-height:96px;line-height:1.55}
+.field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238B97AB' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center;padding-right:34px}
+.field select optgroup{background:var(--panel-2);color:var(--teal);font-family:var(--f-mono);font-size:11px}
+.field select option{background:var(--panel-2);color:var(--ink);font-family:var(--f-body)}
+.field .hint{font-size:11px;color:var(--faint)}
+.field.invalid input,.field.invalid select,.field.invalid textarea{border-color:var(--crit);box-shadow:0 0 0 3px var(--crit-bg)}
 
-/* ---------- KPI strip ---------- */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
-.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:17px 18px;
-  position:relative;overflow:hidden}
-.kpi::after{content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;
-  background:radial-gradient(circle,var(--teal-glow),transparent 70%);opacity:.6}
-.kpi .lab{font-family:var(--f-mono);font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);
-  display:flex;align-items:center;gap:8px}
-.kpi .lab svg{width:15px;height:15px;color:var(--teal)}
-.kpi .val{font-family:var(--f-disp);font-size:32px;font-weight:700;margin-top:10px;line-height:1;letter-spacing:.5px}
-.kpi .delta{font-family:var(--f-mono);font-size:11px;margin-top:8px;display:flex;align-items:center;gap:5px;color:var(--muted)}
-.kpi .delta.up{color:var(--ok)} .kpi .delta.down{color:var(--crit)}
-.kpi.alert .val{color:var(--crit)} .kpi.warn .val{color:var(--high)}
+/* ---------- Priority selector ---------- */
+.pri-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.pri-opt{border:1px solid var(--line-2);border-radius:var(--r-sm);padding:13px 10px;text-align:center;
+  background:var(--void);transition:.15s;position:relative;overflow:hidden}
+.pri-opt:hover{border-color:var(--line-2);background:var(--panel-2)}
+.pri-opt .dot{width:9px;height:9px;border-radius:50%;margin:0 auto 8px}
+.pri-opt .lvl{font-family:var(--f-disp);font-size:14px;font-weight:600;letter-spacing:.4px}
+.pri-opt .sla{font-family:var(--f-mono);font-size:9.5px;color:var(--muted);margin-top:3px;letter-spacing:.5px}
+.pri-opt[data-p="low"] .dot{background:var(--low);box-shadow:0 0 10px var(--low)}
+.pri-opt[data-p="medium"] .dot{background:var(--med);box-shadow:0 0 10px var(--med)}
+.pri-opt[data-p="high"] .dot{background:var(--high);box-shadow:0 0 10px var(--high)}
+.pri-opt[data-p="critical"] .dot{background:var(--crit);box-shadow:0 0 10px var(--crit)}
+.pri-opt.sel[data-p="low"]{border-color:var(--low);background:var(--low-bg)}
+.pri-opt.sel[data-p="medium"]{border-color:var(--med);background:var(--med-bg)}
+.pri-opt.sel[data-p="high"]{border-color:var(--high);background:var(--high-bg)}
+.pri-opt.sel[data-p="critical"]{border-color:var(--crit);background:var(--crit-bg)}
+.pri-opt.ai-pick::after{content:"AI";position:absolute;top:5px;right:6px;font-family:var(--f-mono);
+  font-size:8px;letter-spacing:.5px;color:var(--teal);border:1px solid var(--teal-dim);border-radius:4px;padding:1px 4px}
 
-/* ---------- Panels / cards ---------- */
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
-.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:15px 18px;border-bottom:1px solid var(--line)}
-.panel-head h3{font-family:var(--f-disp);font-size:15.5px;font-weight:600;letter-spacing:.3px;display:flex;align-items:center;gap:9px}
-.panel-head h3 svg{width:17px;height:17px;color:var(--teal)}
-.panel-body{padding:18px}
-.grid-2{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+/* ---------- Submit bar ---------- */
+.submitbar{display:flex;align-items:center;gap:16px;padding:18px 24px;flex-wrap:wrap}
+.secure{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
+.secure svg{width:14px;height:14px;color:var(--teal)}
+.btn-submit{margin-left:auto;display:flex;align-items:center;gap:9px;background:var(--teal);color:#06281f;
+  font-weight:700;font-size:14px;padding:13px 24px;border-radius:var(--r-sm);transition:.16s;letter-spacing:.3px}
+.btn-submit:hover{filter:brightness(1.08);box-shadow:0 0 24px var(--teal-glow)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed}
+.btn-submit svg{width:17px;height:17px}
 
-/* ---------- Status & priority chips ---------- */
-.chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:10.5px;
-  font-weight:600;letter-spacing:.5px;padding:4px 9px;border-radius:7px;text-transform:uppercase;white-space:nowrap}
-.chip .pip{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 7px currentColor}
-.pri-critical{color:var(--crit);background:var(--crit-bg)} .pri-high{color:var(--high);background:var(--high-bg)}
-.pri-medium{color:var(--med);background:var(--med-bg)} .pri-low{color:var(--low);background:var(--low-bg)}
-.st-open{color:var(--low);background:var(--low-bg)} .st-progress{color:var(--high);background:var(--high-bg)}
-.st-waiting{color:var(--med);background:var(--med-bg)} .st-resolved{color:var(--ok);background:var(--ok-bg)}
-.st-closed{color:var(--faint);background:rgba(92,102,120,.12)}
-
-/* ---------- Ticket table ---------- */
-.tk-toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
-.seg button{padding:7px 13px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--muted);transition:.15s}
-.seg button.on{background:var(--panel-3);color:var(--ink)}
-.fld{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:9px 13px;color:var(--ink);outline:none}
-.fld:focus{border-color:var(--teal-dim)}
-select.fld{cursor:pointer}
-.tk-list{display:flex;flex-direction:column;gap:0}
-.tk-row{display:grid;grid-template-columns:84px 1fr 120px 116px 130px 96px;gap:14px;align-items:center;
-  padding:14px 18px;border:1px solid var(--line);border-top:none;background:var(--panel);transition:.14s;cursor:pointer}
-.tk-row:first-child{border-top:1px solid var(--line);border-radius:var(--r) var(--r) 0 0}
-.tk-row:last-child{border-radius:0 0 var(--r) var(--r)}
-.tk-row:hover{background:var(--panel-2);border-color:var(--line-2)}
-.tk-row.compact{grid-template-columns:64px 1fr auto;gap:12px}
-.tk-id{font-family:var(--f-mono);font-size:12px;color:var(--teal);font-weight:500}
-.tk-subj{font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tk-meta{font-size:11.5px;color:var(--muted);margin-top:3px;display:flex;gap:9px;font-family:var(--f-mono)}
-.tk-assignee{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
-.tk-assignee .avatar{width:26px;height:26px;font-size:11px;border-radius:7px}
-.sla-bar{height:5px;border-radius:5px;background:var(--panel-3);overflow:hidden;margin-top:6px}
-.sla-bar i{display:block;height:100%;border-radius:5px;transition:width .5s}
-.sla-txt{font-family:var(--f-mono);font-size:10.5px;color:var(--muted)}
-
-/* ---------- Triage console (signature) ---------- */
-.triage{background:linear-gradient(165deg,#10171f,#0c1117);border:1px solid var(--line-2);
-  border-radius:var(--r);overflow:hidden;position:relative}
-.triage::before{content:"";position:absolute;inset:0;background:
-  repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(45,226,192,.012) 3px,transparent 4px);
-  pointer-events:none}
+/* ---------- Live AI Triage panel ---------- */
+.triage{position:sticky;top:86px}
 .triage-head{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
 .triage-head>svg{width:16px;height:16px;flex:0 0 auto;color:var(--teal)}
-.triage-head .ttl{font-family:var(--f-disp);font-size:14px;font-weight:600;letter-spacing:.5px}
-.triage-head .live{margin-left:auto;font-family:var(--f-mono);font-size:9.5px;letter-spacing:1.5px;
-  color:var(--teal);display:flex;align-items:center;gap:6px}
-.triage-head .live .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);
-  box-shadow:0 0 9px var(--teal);animation:pulse 1.4s infinite}
-.readout{padding:16px 18px;display:flex;flex-direction:column;gap:15px}
-.gauge{}
-.gauge .gl{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:10.5px;
-  letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
-.gauge .gv{font-weight:700;color:var(--ink)}
-.gauge .track{height:8px;background:#0a0e14;border:1px solid var(--line);border-radius:6px;overflow:hidden;position:relative}
-.gauge .fill{height:100%;border-radius:6px;width:0;transition:width .7s cubic-bezier(.2,.8,.2,1);
-  background:linear-gradient(90deg,var(--teal-dim),var(--teal));box-shadow:0 0 12px var(--teal-glow)}
-.conf-row{display:flex;gap:8px;flex-wrap:wrap}
-.conf-tag{font-family:var(--f-mono);font-size:11px;padding:5px 10px;border-radius:7px;
-  background:var(--panel-2);border:1px solid var(--line);color:var(--muted)}
-.conf-tag b{color:var(--teal)}
-.sim-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
-.sim-item .id{font-family:var(--f-mono);font-size:11px;color:var(--teal)}
-.sim-item .mt{font-size:12px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)}
-.sim-item .pct{font-family:var(--f-mono);font-size:11px;color:var(--ink);font-weight:600}
+.triage-head h3{font-family:var(--f-disp);font-size:15px;font-weight:600}
+.triage-status{margin-left:auto;display:flex;align-items:center;gap:6px;font-family:var(--f-mono);
+  font-size:9.5px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+.triage-status .pulse{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+.triage-status.ready{color:var(--teal)}
+.triage-status.ready .pulse{background:var(--teal);box-shadow:0 0 8px var(--teal);animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.triage-body{padding:18px}
+.triage-empty{color:var(--faint);font-size:13px;line-height:1.6;text-align:center;padding:22px 6px}
+.triage-empty svg{width:30px;height:30px;color:var(--line-2);margin-bottom:12px}
+.tlabel{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-mono);
+  font-size:10px;letter-spacing:1.3px;color:var(--muted);text-transform:uppercase;margin:16px 0 8px}
+.tlabel:first-child{margin-top:0}
+.tlabel b{font-size:12px;color:var(--ink)}
+.tlabel b.crit{color:var(--crit)} .tlabel b.high{color:var(--high)}
+.tlabel b.medium{color:var(--med)} .tlabel b.low{color:var(--low)}
+.conf-bar{height:5px;border-radius:3px;background:var(--void);overflow:hidden;margin-bottom:4px}
+.conf-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal-dim),var(--teal));border-radius:3px;transition:width .4s}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-mono);font-size:11px;background:var(--panel-2);border:1px solid var(--line-2);
+  border-radius:6px;padding:5px 9px;color:var(--muted)}
+.chip b{color:var(--ink)} .chip.lead{border-color:var(--teal-dim);background:var(--teal-glow);color:var(--ink)}
+.chip.lead b{color:var(--teal)}
+.sigbar{height:5px;border-radius:3px;background:var(--void);overflow:hidden}
+.sigbar i{display:block;height:100%;border-radius:3px;transition:width .4s}
+.rel{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.rel:first-of-type{border-top:none}
+.rel .rid{font-family:var(--f-mono);font-size:11px;color:var(--teal);flex:none}
+.rel .rlabel{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.rel .rpct{font-family:var(--f-mono);font-size:11px;color:var(--ink);flex:none}
+.divider{height:1px;background:var(--line);margin:16px 0}
 
-/* ---------- Forms ---------- */
-.form-grid{display:grid;gap:16px}
-.field label{display:block;font-family:var(--f-mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;
-  color:var(--muted);margin-bottom:7px}
-.field input,.field select,.field textarea{width:100%;background:var(--panel-2);border:1px solid var(--line);
-  border-radius:10px;padding:11px 13px;color:var(--ink);outline:none;transition:.15s;resize:vertical}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal-dim);box-shadow:0 0 0 3px var(--teal-glow);background:var(--panel)}
-.field textarea{min-height:120px;line-height:1.6}
-.row-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+/* ---------- Success state ---------- */
+.success{text-align:center;padding:46px 26px}
+.success .ok-ic{width:66px;height:66px;border-radius:50%;background:var(--ok-bg);border:1px solid var(--ok);
+  display:grid;place-items:center;margin:0 auto 20px;box-shadow:0 0 30px rgba(54,211,153,.25)}
+.success .ok-ic svg{width:32px;height:32px;color:var(--ok)}
+.success h2{font-family:var(--f-disp);font-size:24px;font-weight:700}
+.success p{color:var(--muted);margin-top:9px;max-width:440px;margin-inline:auto}
+.success .refbox{display:inline-flex;align-items:center;gap:10px;margin-top:22px;background:var(--void);
+  border:1px solid var(--line-2);border-radius:var(--r-sm);padding:13px 18px}
+.success .refbox .k{font-family:var(--f-mono);font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.success .refbox .v{font-family:var(--f-mono);font-size:18px;font-weight:600;color:var(--teal);letter-spacing:1px}
+.success .summary{margin:24px auto 0;max-width:480px;text-align:left;background:var(--void);
+  border:1px solid var(--line);border-radius:var(--r-sm);padding:16px 18px}
+.success .summary .sr{display:flex;justify-content:space-between;gap:14px;padding:6px 0;font-size:13px}
+.success .summary .sr .sk{color:var(--muted)} .success .summary .sr .sv{color:var(--ink);text-align:right}
+.success .actions{margin-top:24px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.success .actions a,.success .actions button{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;
+  border-radius:var(--r-sm);font-weight:600;font-size:13px;transition:.16s}
+.success .actions .primary{background:var(--teal);color:#06281f}
+.success .actions .primary:hover{filter:brightness(1.08)}
+.success .actions .ghost{border:1px solid var(--line-2);color:var(--muted)}
+.success .actions .ghost:hover{color:var(--ink);background:var(--panel-2)}
 
-/* ---------- Ticket detail ---------- */
-.detail-grid{display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:start}
-.thread{display:flex;flex-direction:column;gap:14px}
-.msg{display:flex;gap:12px}
-.msg .avatar{width:36px;height:36px;font-size:13px}
-.msg.agent .bubble{border-left:2px solid var(--teal)}
-.bubble{flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
-.bubble .bh{display:flex;align-items:center;gap:9px;margin-bottom:6px}
-.bubble .bh .who{font-weight:600;font-size:13px}
-.bubble .bh .when{font-family:var(--f-mono);font-size:10.5px;color:var(--faint);margin-left:auto}
-.bubble .txt{font-size:13.5px;line-height:1.6;color:var(--ink)}
-.meta-list{display:flex;flex-direction:column}
-.meta-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);gap:12px}
-.meta-row:last-child{border-bottom:none}
-.meta-row .k{font-family:var(--f-mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-.timeline{position:relative;padding-left:22px}
-.timeline::before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--line)}
-.tl-item{position:relative;padding-bottom:16px}
-.tl-item::before{content:"";position:absolute;left:-19px;top:3px;width:10px;height:10px;border-radius:50%;
-  background:var(--panel);border:2px solid var(--teal)}
-.tl-item .tt{font-size:12.5px;font-weight:500}
-.tl-item .td{font-family:var(--f-mono);font-size:10.5px;color:var(--faint);margin-top:2px}
+.toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(120px);z-index:90;
+  background:var(--panel-3);border:1px solid var(--line-2);border-radius:var(--r-sm);padding:13px 20px;
+  box-shadow:var(--sh);display:flex;align-items:center;gap:10px;font-size:13.5px;transition:transform .3s;max-width:90vw}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast svg{width:17px;height:17px;flex:none}
+.toast.err svg{color:var(--crit)} .toast.ok svg{color:var(--ok)} .toast.warn svg{color:var(--high)}
 
-/* ---------- KB ---------- */
-.kb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.kb-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;
-  transition:.16s;cursor:pointer}
-.kb-card:hover{border-color:var(--teal-dim);transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.3)}
-.kb-card .cat{font-family:var(--f-mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal)}
-.kb-card h4{font-family:var(--f-disp);font-size:15.5px;font-weight:600;margin:9px 0 8px;line-height:1.3}
-.kb-card p{font-size:12.5px;color:var(--muted);line-height:1.55;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.kb-card .ft{display:flex;gap:14px;margin-top:13px;font-family:var(--f-mono);font-size:10.5px;color:var(--faint)}
-
-/* ---------- Analytics charts ---------- */
-.chart-wrap{position:relative;height:240px}
-.chart-wrap canvas{width:100%;height:100%}
-.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}
-.legend span{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted)}
-.legend i{width:11px;height:11px;border-radius:3px}
-
-/* ---------- Chatbot ---------- */
-.chat-fab{position:fixed;right:24px;bottom:24px;width:58px;height:58px;border-radius:18px;z-index:60;
-  background:var(--teal);color:#04130f;display:grid;place-items:center;box-shadow:0 10px 30px var(--teal-glow);transition:.18s}
-.chat-fab:hover{transform:scale(1.06) translateY(-2px)}
-.chat-fab svg{width:26px;height:26px}
-.chat-fab .ping{position:absolute;top:-3px;right:-3px;width:18px;height:18px;border-radius:50%;
-  background:var(--crit);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;border:2px solid var(--void)}
-.chat-panel{position:fixed;right:24px;bottom:96px;width:380px;max-width:calc(100vw - 32px);height:560px;max-height:calc(100vh - 130px);
-  background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-lg);z-index:60;display:none;
-  flex-direction:column;overflow:hidden;box-shadow:var(--sh);animation:fade .25s ease}
-.chat-panel.open{display:flex}
-.chat-top{display:flex;align-items:center;gap:11px;padding:15px 17px;border-bottom:1px solid var(--line);
-  background:linear-gradient(120deg,#11201d,var(--panel))}
-.chat-top .bot{width:38px;height:38px;border-radius:11px;background:var(--teal);display:grid;place-items:center;flex:none}
-.chat-top .bot svg{width:21px;height:21px;color:#04130f}
-.chat-top .nm{font-family:var(--f-disp);font-weight:600;font-size:14.5px}
-.chat-top .stat{font-size:11px;color:var(--ok);display:flex;align-items:center;gap:5px}
-.chat-top .stat::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
-.chat-top .x{margin-left:auto;width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--muted)}
-.chat-top .x:hover{background:var(--panel-2);color:var(--ink)}
-.chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
-.cmsg{display:flex;gap:9px;max-width:88%}
-.cmsg.me{align-self:flex-end;flex-direction:row-reverse}
-.cmsg .ic{width:28px;height:28px;border-radius:8px;flex:none;display:grid;place-items:center}
-.cmsg.bot .ic{background:var(--teal-glow);color:var(--teal)}
-.cmsg.me .ic{background:var(--panel-3);color:var(--ink)}
-.cmsg .ic svg{width:15px;height:15px}
-.cmsg .cb{padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.55}
-.cmsg.bot .cb{background:var(--panel-2);border:1px solid var(--line);border-top-left-radius:4px}
-.cmsg.me .cb{background:var(--teal);color:#04130f;border-top-right-radius:4px;font-weight:500}
-.cmsg .cb a{color:var(--teal);text-decoration:underline}
-.cmsg.me .cb a{color:#04130f}
-.quick{display:flex;gap:7px;flex-wrap:wrap;padding:0 16px 10px}
-.quick button{font-size:11.5px;padding:7px 11px;border-radius:18px;background:var(--panel-2);
-  border:1px solid var(--line);color:var(--muted);transition:.14s}
-.quick button:hover{border-color:var(--teal-dim);color:var(--ink)}
-.chat-input{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line)}
-.chat-input input{flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:11px;padding:10px 13px;color:var(--ink);outline:none}
-.chat-input input:focus{border-color:var(--teal-dim)}
-.chat-input button{width:42px;height:42px;border-radius:11px;background:var(--teal);color:#04130f;display:grid;place-items:center;flex:none}
-.typing{display:flex;gap:4px;padding:4px 2px}
-.typing i{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:bounce 1.2s infinite}
-.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
-@keyframes bounce{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-5px)}}
-
-/* ---------- Modal ---------- */
-.modal-bg{position:fixed;inset:0;background:rgba(4,6,10,.7);backdrop-filter:blur(4px);z-index:80;
-  display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto}
-.modal-bg.open{display:flex}
-.modal{background:var(--panel);border:1px solid var(--line-2);border-radius:var(--r-lg);width:100%;max-width:680px;
-  box-shadow:var(--sh);animation:fade .25s ease}
-.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
-.modal-head h3{font-family:var(--f-disp);font-size:18px;font-weight:700}
-.modal-head .x{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--muted);border:1px solid var(--line)}
-.modal-head .x:hover{background:var(--panel-2);color:var(--ink)}
-.modal-body{padding:22px;max-height:70vh;overflow-y:auto}
-.modal-foot{display:flex;gap:10px;justify-content:flex-end;padding:16px 22px;border-top:1px solid var(--line)}
-
-/* ---------- Toast ---------- */
-.toast-wrap{position:fixed;top:18px;right:18px;z-index:100;display:flex;flex-direction:column;gap:10px}
-.toast{display:flex;align-items:center;gap:11px;background:var(--panel-2);border:1px solid var(--line-2);
-  border-radius:12px;padding:13px 16px;min-width:260px;box-shadow:var(--sh);animation:slideIn .3s ease}
-.toast.ok{border-left:3px solid var(--ok)}.toast.err{border-left:3px solid var(--crit)}.toast.info{border-left:3px solid var(--teal)}
-.toast svg{width:19px;height:19px;flex:none}
-.toast.ok svg{color:var(--ok)}.toast.err svg{color:var(--crit)}.toast.info svg{color:var(--teal)}
-.toast .tt{font-size:13px;font-weight:600}.toast .ts{font-size:11.5px;color:var(--muted)}
-@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
-
-/* ---------- Empty / misc ---------- */
-.empty{text-align:center;padding:60px 20px;color:var(--muted)}
-.empty svg{width:46px;height:46px;color:var(--line-2);margin-bottom:14px}
-.empty h4{font-family:var(--f-disp);font-size:17px;color:var(--ink);margin-bottom:6px}
-.mono{font-family:var(--f-mono)}
-.muted{color:var(--muted)}
-.spark{height:34px;display:flex;align-items:flex-end;gap:3px}
-.spark i{flex:1;background:var(--teal-dim);border-radius:2px;opacity:.55;min-height:3px}
-.spark i:last-child{background:var(--teal);opacity:1}
-
-/* ---------- Mobile bottom nav ---------- */
-.mob-nav{display:none}
+.pagefoot{text-align:center;font-family:var(--f-mono);font-size:10px;letter-spacing:2px;color:var(--faint);
+  text-transform:uppercase;margin-top:46px;padding-top:24px;border-top:1px solid var(--line)}
 
 /* ---------- Responsive ---------- */
-@media(max-width:1100px){
-  .grid-2{grid-template-columns:1fr}
-  .detail-grid{grid-template-columns:1fr}
-  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+@media(max-width:920px){
+  .grid{grid-template-columns:1fr}
+  .triage{position:static}
 }
-@media(max-width:860px){
-  #app{grid-template-columns:1fr}
-  .sidebar{transform:translateX(-100%);transition:transform .28s ease;width:270px;box-shadow:var(--sh)}
-  .sidebar.open{transform:none}
-  .main{grid-column:1}
-  .menu-btn{display:grid}
-  .sb-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:49;display:none}
-  .sb-backdrop.show{display:block}
-  .view{padding:18px 16px 90px}
-  .topbar{padding:11px 16px}
-  .conn{display:none}
-  .tk-row{grid-template-columns:1fr auto;gap:8px}
-  .tk-row .col-hide{display:none}
-  .grid-3{grid-template-columns:1fr}
-  .mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:45;background:var(--panel);
-    border-top:1px solid var(--line);padding:8px 6px calc(8px + env(safe-area-inset-bottom));justify-content:space-around}
-  .mob-nav button{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);
-    font-size:10px;padding:5px 10px;border-radius:9px;flex:1}
-  .mob-nav button.active{color:var(--teal)}
-  .mob-nav button svg{width:21px;height:21px}
-  .chat-fab{bottom:78px}
-  .chat-panel{bottom:140px}
-}
-@media(max-width:520px){
-  .kpi-grid{grid-template-columns:1fr 1fr}
-  .view-head h2{font-size:21px}
-  .modal-body{padding:16px}
-  .row-2{grid-template-columns:1fr}
+@media(max-width:560px){
+  .wrap{padding:22px 14px 60px}
+  .frow{grid-template-columns:1fr}
+  .pri-grid{grid-template-columns:1fr 1fr}
+  .page-title{font-size:24px}
+  .fset{padding:18px 16px}
+  .topbar{padding:12px 14px}
+  .back-link span{display:none}
+  .btn-submit{width:100%;justify-content:center;margin-left:0}
+  .submitbar .secure{order:2}
 }
 </style>
 </head>
 <body>
-<div id="app">
-  <!-- Sidebar injected by JS -->
-  <aside class="sidebar" id="sidebar"></aside>
-  <div class="sb-backdrop" id="sbBackdrop" onclick="UI.toggleSidebar(false)"></div>
-  <div class="main">
-    <header class="topbar">
-      <button class="menu-btn" onclick="UI.toggleSidebar(true)" aria-label="Menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="3" y1="6" x2="21" y2="6" stroke-width="2"/><line x1="3" y1="12" x2="21" y2="12" stroke-width="2"/><line x1="3" y1="18" x2="21" y2="18" stroke-width="2"/></svg>
-      </button>
-      <div class="search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="21" y1="21" x2="16.5" y2="16.5" stroke-width="2"/></svg>
-        <input id="globalSearch" placeholder="Search tickets, clients, knowledge base…" oninput="App.globalSearch(this.value)">
-      </div>
-      <div class="top-spacer"></div>
-      <div class="conn" id="connPill"><span class="dot"></span><span id="connTxt">Demo mode</span></div>
-      <button class="btn btn-primary" onclick="App.openNewTicket()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19" stroke-width="2.2"/><line x1="5" y1="12" x2="19" y2="12" stroke-width="2.2"/></svg>
-        <span class="nt-label">New ticket</span>
-      </button>
-    </header>
-    <main id="viewRoot"></main>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#2DE2C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12h4l2 5 4-12 2 7h6"/></svg>
+    </div>
+    <div>
+      <h1>NEXDESK</h1>
+      <div class="sub">Support Operations</div>
+    </div>
   </div>
-</div>
+  <span class="intake-pill">Secure Intake</span>
+  <a class="back-link" href="https://resitch-source.github.io/NEXARCH.IO/nexarch-website.html">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    <span>Back to site</span>
+  </a>
+</header>
 
-<!-- Mobile bottom nav -->
-<nav class="mob-nav" id="mobNav"></nav>
+<main class="wrap">
+  <div class="eyebrow">Technical Support · Ticket Intake</div>
+  <h1 class="page-title">Raise a Support Ticket</h1>
+  <p class="page-sub">Submit a technical issue to the NEXARCH engineering team. Our Live AI Triage classifies and
+    prioritises your ticket in real time so the right engineer responds faster.</p>
 
-<!-- Chatbot -->
-<button class="chat-fab" id="chatFab" onclick="Chat.toggle()" aria-label="AI assistant">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5z" stroke-width="2"/></svg>
-  <span class="ping" id="chatPing">1</span>
-</button>
-<div class="chat-panel" id="chatPanel"></div>
+  <div class="grid" id="grid">
+    <!-- FORM -->
+    <section class="panel form-panel" id="formPanel">
+      <div class="fset">
+        <div class="fset-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Contact Details
+        </div>
+        <div class="frow">
+          <div class="field"><label>Full Name <span class="req">*</span></label><input id="f_name" placeholder="Juan dela Cruz" autocomplete="name"></div>
+          <div class="field"><label>Company / Organisation <span class="req">*</span></label><input id="f_company" placeholder="e.g. Republic Cement" autocomplete="organization"></div>
+          <div class="field"><label>Email Address <span class="req">*</span></label><input id="f_email" type="email" placeholder="name@company.com" autocomplete="email"></div>
+          <div class="field"><label>Phone / Mobile</label><input id="f_phone" placeholder="+63 9XX XXX XXXX" autocomplete="tel"></div>
+        </div>
+      </div>
 
-<!-- Modal mount -->
-<div class="modal-bg" id="modalBg" onclick="if(event.target===this)UI.closeModal()"><div class="modal" id="modal"></div></div>
+      <div class="fset">
+        <div class="fset-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          System Information
+        </div>
+        <div class="frow">
+          <div class="field"><label>Plant / Site Name <span class="req">*</span></label><input id="f_site" placeholder="e.g. Norzagaray Plant, Line 2"></div>
+          <div class="field"><label>System / Equipment</label><input id="f_system" placeholder="e.g. Kiln drive, Boiler feedwater"></div>
+          <div class="field full"><label>Product / Platform</label>
+            <select id="f_product">
+              <option value="">Select product…</option>
+              <optgroup label="SIEMENS">
+                <option>Siemens PCS 7 CEMAT</option>
+                <option>Siemens PCS Neo DCS</option>
+                <option>Siemens Braumat</option>
+                <option>Siemens TIA Portal / S7 PLC</option>
+                <option>Siemens WinCC SCADA</option>
+                <option>Siemens MES (SIMATIC IT)</option>
+              </optgroup>
+              <optgroup label="ROCKWELL / ALLEN-BRADLEY">
+                <option>Rockwell PlantPAx DCS</option>
+                <option>Allen-Bradley ControlLogix / CompactLogix</option>
+                <option>FactoryTalk View SE / ME</option>
+                <option>FactoryTalk MES</option>
+              </optgroup>
+              <optgroup label="SCHNEIDER">
+                <option>Schneider BrewMax</option>
+                <option>Schneider EcoStruxure / Modicon M580</option>
+                <option>AVEVA / Wonderware SCADA</option>
+              </optgroup>
+              <optgroup label="OTHER BRANDS">
+                <option>Emerson DeltaV DCS</option>
+                <option>Emerson Ovation DCS</option>
+                <option>Honeywell Experion PKS</option>
+                <option>GE Mark VIe / iFIX SCADA</option>
+                <option>ABB System 800xA</option>
+                <option>Yokogawa CENTUM VP</option>
+                <option>Mitsubishi MELSEC iQ-R</option>
+              </optgroup>
+              <optgroup label="GENERAL">
+                <option>HMI / Operator Interface</option>
+                <option>VFD / Motor Drive</option>
+                <option>Field Instruments</option>
+                <option>SCADA / Historian</option>
+                <option>Network / Communications</option>
+                <option>Web App / Software</option>
+                <option>Other</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="field full"><label>Support Type <span class="req">*</span></label>
+            <select id="f_supportType">
+              <option value="">Select type…</option>
+              <option>Troubleshooting / Fault Diagnosis</option>
+              <option>System Recovery / Restore</option>
+              <option>Configuration / Programming</option>
+              <option>Hardware Replacement</option>
+              <option>Software Update / Upgrade</option>
+              <option>Backup / Restore</option>
+              <option>Performance Issue</option>
+              <option>Network / Communication Fault</option>
+              <option>Training / Guidance</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-<!-- Toasts -->
-<div class="toast-wrap" id="toastWrap"></div>
+      <div class="fset">
+        <div class="fset-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2 5 4-12 2 7h6"/></svg>
+          Priority Level
+        </div>
+        <div class="pri-grid" id="priGrid">
+          <button type="button" class="pri-opt" data-p="low" onclick="App.setPriority('low',true)"><div class="dot"></div><div class="lvl">Low</div><div class="sla">Scheduled</div></button>
+          <button type="button" class="pri-opt sel" data-p="medium" onclick="App.setPriority('medium',true)"><div class="dot"></div><div class="lvl">Medium</div><div class="sla">24 HRS</div></button>
+          <button type="button" class="pri-opt" data-p="high" onclick="App.setPriority('high',true)"><div class="dot"></div><div class="lvl">High</div><div class="sla">4 HRS</div></button>
+          <button type="button" class="pri-opt" data-p="critical" onclick="App.setPriority('critical',true)"><div class="dot"></div><div class="lvl">Critical</div><div class="sla">Immediate</div></button>
+        </div>
+      </div>
+
+      <div class="fset">
+        <div class="fset-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+          Issue Description
+        </div>
+        <div class="frow">
+          <div class="field full"><label>Issue Title / Subject <span class="req">*</span></label>
+            <input id="f_title" placeholder="e.g. Siemens S7-1200 dropped to STOP mode" oninput="App.onTriageInput()"></div>
+          <div class="field full"><label>Detailed Description <span class="req">*</span></label>
+            <textarea id="f_description" placeholder="Describe the symptom, when it started, error messages, affected area…" oninput="App.onTriageInput()"></textarea></div>
+          <div class="field full"><label>Steps Already Taken</label>
+            <textarea id="f_stepsTaken" placeholder="What have you tried so far? (optional)"></textarea></div>
+        </div>
+      </div>
+
+      <div class="submitbar">
+        <div class="secure">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Logged securely to NEXARCH Support · resitch@gmail.com
+        </div>
+        <button class="btn-submit" id="submitBtn" onclick="App.submit()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          Raise Ticket
+        </button>
+      </div>
+    </section>
+
+    <!-- LIVE AI TRIAGE -->
+    <aside class="panel triage" id="triagePanel">
+      <div class="triage-head">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+        <h3>Live AI Triage</h3>
+        <div class="triage-status" id="triageStatus"><span class="pulse"></span><span id="triageStatusText">Standby</span></div>
+      </div>
+      <div class="triage-body" id="triageBody">
+        <div class="triage-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <div>Start typing an issue title or description — the AI will classify the category, suggest a priority, and surface related cases in real time.</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="pagefoot">NEXARCH Systems Engineering · NEXDESK Support Console · Precision. Scale. Control.</div>
+</main>
+
+<div class="toast" id="toast"><span id="toastIc"></span><span id="toastMsg"></span></div>
 
 <script>
-/* ================================================================
-   NEXDESK · Support Operations Console
-   Single-file PWA logic — zero build tools.
-   Backend: Google Sheets via Apps Script (configurable endpoint).
-   AI/ML: client-side (classification, priority, sentiment, similarity).
-   Powered by Cyrabell / NEXARCH Systems Engineering.
-================================================================ */
-'use strict';
-
-/* roundRect polyfill (older Safari/Chrome) */
-if(typeof CanvasRenderingContext2D!=='undefined' && !CanvasRenderingContext2D.prototype.roundRect){
-  CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
-    if(typeof r==='number')r=[r,r,r,r]; this.beginPath();
-    this.moveTo(x+r[0],y);this.arcTo(x+w,y,x+w,y+h,r[1]);this.arcTo(x+w,y+h,x,y+h,r[2]);
-    this.arcTo(x,y+h,x,y,r[3]);this.arcTo(x,y,x+w,y,r[0]);this.closePath();return this;};
-}
-
-/* ---------- CONFIG ---------- */
+/* ════════════════════════════════════════════════════════════
+   CONFIG  — paste your Apps Script Web App /exec URL here
+════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  // Paste your Apps Script Web App URL here after deploying the backend.
-  // Leave blank to run fully in offline Demo mode with seeded data.
-  API_URL: localStorage.getItem('nexdesk_api') || '',
-  ORG: 'NEXARCH Systems Engineering',
-  SLA_HOURS: { critical: 4, high: 12, medium: 24, low: 72 }, // resolution targets
-  CACHE_KEY: 'nexdesk_cache_v1',
-  POLL_MS: 60000
+  // Deploy the NEXARCH ticketing Apps Script as a Web App (Execute as: Me,
+  // Access: Anyone) and paste the /exec URL below. Leave blank to test the
+  // form + AI triage offline (submissions fall back to email).
+  TS_SHEETS_URL: '',
+  NOTIFY_EMAIL: 'resitch@gmail.com',
+  SLA_HOURS: { critical: 4, high: 12, medium: 24, low: 72 }
 };
 
-/* ---------- ICONS ---------- */
-const ICON = {
-  grid:'<path d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" stroke-width="1.9"/>',
-  ticket:'<path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 6 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-6z" stroke-width="1.9"/><line x1="13" y1="7" x2="13" y2="17" stroke-width="1.6" stroke-dasharray="2 2"/>',
-  book:'<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22.5z" stroke-width="1.9"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke-width="1.9"/>',
-  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke-width="1.9"/><circle cx="9" cy="7" r="4" stroke-width="1.9"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11" stroke-width="1.9"/>',
-  chart:'<line x1="4" y1="20" x2="20" y2="20" stroke-width="1.9"/><rect x="6" y="11" width="3" height="7" stroke-width="1.9"/><rect x="11" y="6" width="3" height="12" stroke-width="1.9"/><rect x="16" y="13" width="3" height="5" stroke-width="1.9"/>',
-  bot:'<rect x="4" y="8" width="16" height="12" rx="3" stroke-width="1.9"/><path d="M12 8V4M8 4h8" stroke-width="1.9"/><circle cx="9" cy="14" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="14" r="1.3" fill="currentColor" stroke="none"/>',
-  gear:'<circle cx="12" cy="12" r="3.2" stroke-width="1.9"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 0 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 2.7-1.1V3a2 2 0 0 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 0 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z" stroke-width="1.5"/>',
-  clock:'<circle cx="12" cy="12" r="9" stroke-width="1.9"/><path d="M12 7v5l3 2" stroke-width="1.9"/>',
-  alert:'<path d="M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0z" stroke-width="1.9"/><line x1="12" y1="9" x2="12" y2="13" stroke-width="2"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/>',
-  check:'<path d="M20 6 9 17l-5-5" stroke-width="2.2"/>',
-  spark:'<path d="M12 2v6M12 16v6M2 12h6M16 12h6M5 5l4 4M15 15l4 4M19 5l-4 4M9 15l-4 4" stroke-width="1.6"/>',
-  flag:'<path d="M4 22V4M4 4h13l-2 4 2 4H4" stroke-width="1.9"/>',
-  trend:'<path d="M3 17l6-6 4 4 8-8" stroke-width="2"/><path d="M17 7h4v4" stroke-width="2"/>',
-  send:'<path d="M22 2 11 13M22 2l-7 20-4-9-9-4z" stroke-width="2"/>',
-  user:'<circle cx="12" cy="8" r="4" stroke-width="1.9"/><path d="M4 21a8 8 0 0 1 16 0" stroke-width="1.9"/>',
-  x:'<line x1="6" y1="6" x2="18" y2="18" stroke-width="2"/><line x1="18" y1="6" x2="6" y2="18" stroke-width="2"/>',
-  pulse:'<path d="M3 12h4l3-9 4 18 3-9h4" stroke-width="1.9"/>',
-  inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2" stroke-width="1.9"/><path d="M5.5 5h13l3.5 7v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6z" stroke-width="1.9"/>'
-};
-function svg(p,cls){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ${cls?`class="${cls}"`:''}>${p}</svg>`}
-
-/* ---------- AGENTS / CLIENTS (reference data) ---------- */
-const AGENTS = [
-  {id:'A1', name:'Ray Sitchon', role:'Lead Engineer', init:'RS'},
-  {id:'A2', name:'Marco Dela Cruz', role:'OT Specialist', init:'MD'},
-  {id:'A3', name:'Jenny Alonzo', role:'Process Control', init:'JA'},
-  {id:'A4', name:'Paolo Reyes', role:'Field Technician', init:'PR'},
-  {id:'A5', name:'Liza Tan', role:'Support Analyst', init:'LT'}
-];
-const CLIENTS = [
-  {id:'C1', name:'Republic Cement', sector:'Cement', sla:'Priority'},
-  {id:'C2', name:'Holcim Philippines', sector:'Cement', sla:'Priority'},
-  {id:'C3', name:'SMC Power (SMBC)', sector:'Power Generation', sla:'Critical'},
-  {id:'C4', name:'Semirara Mining (SMPC)', sector:'Mining', sla:'Critical'},
-  {id:'C5', name:'NGCP', sector:'Power Transmission', sla:'Critical'},
-  {id:'C6', name:'National Power Corp (NPC)', sector:'Power Generation', sla:'Priority'},
-  {id:'C7', name:'Pilipinas Kao', sector:'Oleochemical', sla:'Standard'},
-  {id:'C8', name:'Coca-Cola Beverages', sector:'Beverages', sla:'Standard'},
-  {id:'C9', name:'Dr. Arnold Colao', sector:'Healthcare / Dental', sla:'Standard'}
-];
-
-/* ---------- CATEGORIES + ML KEYWORD MODEL ----------
-   Lightweight Naive-Bayes-style keyword weighting per category.
-   Zero dependencies, fully client-side. ------------------------ */
+/* ════════════════════════════════════════════════════════════
+   ML ENGINE  — client-side, zero-cost (mirrors the NEXDESK app)
+════════════════════════════════════════════════════════════ */
 const CATEGORIES = {
-  'PLC / Controller':    ['plc','s7-1200','siemens','ladder','rung','cpu','controller','tia','step7','program','logic','allen bradley','rockwell','firmware'],
-  'SCADA / HMI':         ['scada','hmi','wincc','screen','display','tag','alarm screen','operator','panel','visualization','faceplate','trend'],
-  'Network / OT':        ['network','switch','ethernet','profinet','modbus','ip','ping','vlan','firewall','router','rs-232','rs-485','timeout','disconnect','latency','gateway'],
-  'Instrumentation':     ['sensor','transmitter','flow','pressure','temperature','level','calibration','4-20ma','signal','reading','drift','probe','flowmeter','rtd','thermocouple'],
+  'PLC / Controller':    ['plc','s7-1200','siemens','ladder','rung','cpu','controller','tia','step7','program','logic','allen bradley','rockwell','firmware','controllogix','compactlogix','pcs 7','cemat','pcs neo','plantpax'],
+  'SCADA / HMI':         ['scada','hmi','wincc','screen','display','tag','alarm screen','operator','panel','visualization','faceplate','trend','factorytalk','wonderware','aveva','ifix','experion','800xa','centum','historian'],
+  'Network / OT':        ['network','switch','ethernet','profinet','modbus','ip','ping','vlan','firewall','router','rs-232','rs-485','timeout','disconnect','latency','gateway','communication','comms'],
+  'Instrumentation':     ['sensor','transmitter','flow','pressure','temperature','level','calibration','4-20ma','signal','reading','drift','probe','flowmeter','rtd','thermocouple','field instrument'],
   'Drives / Motor':      ['vfd','drive','motor','inverter','overload','trip','frequency','torque','encoder','soft starter','contactor','overcurrent'],
   'Power / Electrical':  ['power','voltage','outage','breaker','ups','grounding','phase','relay','transformer','earth fault','surge','generator'],
-  'Software / Reports':  ['report','dashboard','export','login','account','license','database','sql','historian','data','excel','password','crash'],
+  'Software / Reports':  ['report','dashboard','export','login','account','license','database','sql','data','excel','password','crash'],
   'Web Apps':            ['web app','webapp','pwa','website','web page','browser','frontend','front-end','github pages','apps script','service worker','manifest','offline mode','cache','deploy','deployment','404','blank page','white screen','console error','cors','fetch','endpoint','json','responsive','mobile view','chrome','safari','install prompt','single-file','html','css','javascript','google sheets'],
   'Process / Tuning':    ['tuning','pid','setpoint','loop','overshoot','oscillation','control','unstable','response','deadband','cascade']
 };
@@ -512,907 +418,242 @@ const PRIORITY_SIGNALS = {
 const NEG_WORDS=['down','stopped','urgent','fail','error','critical','angry','frustrated','unacceptable','asap','immediately','broken','dead','lost','crash','emergency','halt','worst','terrible','no response'];
 const POS_WORDS=['thanks','thank you','great','resolved','working','appreciate','good','fixed','perfect','helpful','please','kindly'];
 
-/* ---------- KNOWLEDGE BASE ---------- */
-const KB = [
-  {id:'KB-01', cat:'PLC / Controller', title:'Siemens S7-1200 goes to STOP mode unexpectedly', views:412, mins:6,
-    body:'A CPU dropping to STOP is usually a diagnostic fault. Connect via TIA Portal → Online & Diagnostics → read the diagnostic buffer for the exact event. Common causes: cycle-time watchdog overrun, hardware module fault (check the SF/ERROR LEDs), or a programming error forcing STOP. Verify 24V supply stability and module wiring before re-downloading. Clear the fault, set CPU to RUN, and monitor cycle time.',
-    tags:['plc','s7-1200','stop','cpu','fault']},
-  {id:'KB-02', cat:'Network / OT', title:'PROFINET device intermittently disconnects', views:308, mins:8,
-    body:'Intermittent PROFINET drops point to physical layer or load issues. Check cable shielding and grounding (single-point earth), confirm switch ports are not exceeding load, and verify update/watchdog times are realistic for the topology. Use the diagnostic buffer to identify which station drops. Replace suspect patch cords and confirm the managed switch supports the required PROFINET QoS/priority.',
-    tags:['profinet','network','disconnect','switch','timeout']},
-  {id:'KB-03', cat:'Drives / Motor', title:'VFD trips on overcurrent during start', views:276, mins:5,
-    body:'Overcurrent at start usually means the acceleration ramp is too aggressive or the load is jammed. Increase accel time, verify motor nameplate parameters are set correctly, and check for mechanical binding. Confirm the VFD is sized for the motor FLA with margin. For high-inertia loads, enable an S-curve ramp. Inspect for phase imbalance on the input supply.',
-    tags:['vfd','overcurrent','trip','motor','drive']},
-  {id:'KB-04', cat:'Instrumentation', title:'4-20mA transmitter reading drifts over time', views:221, mins:7,
-    body:'Signal drift is typically calibration or wiring. Perform a two-point calibration (4mA zero, 20mA span) against a reference. Check loop resistance and confirm no moisture ingress at terminals. For pressure/level, verify the impulse lines are not blocked. Ground loops can also cause drift — confirm a single earth reference for the loop.',
-    tags:['4-20ma','transmitter','calibration','drift','sensor']},
-  {id:'KB-04b', cat:'SCADA / HMI', title:'WinCC HMI tags show #### or no value', views:198, mins:6,
-    body:'A #### or stale value means the tag is not updating from the PLC. Verify the PLC connection status in the HMI runtime, confirm the tag address matches the PLC data block, and check that the comms driver is active. A common cause is an offline CPU or a mismatched data type. Restart the runtime connection and watch the diagnostics.',
-    tags:['wincc','hmi','tag','scada','value']},
-  {id:'KB-05', cat:'Process / Tuning', title:'PID loop oscillates around setpoint', views:184, mins:9,
-    body:'Sustained oscillation means the controller is too aggressive. Reduce proportional gain first, then reduce integral action (increase reset time). Use a step test to estimate process gain and dead time, then apply Lambda or Ziegler-Nichols tuning. For loops with long dead time, consider adding a filter or cascade structure. Always tune in manual-to-auto bumpless transfer.',
-    tags:['pid','tuning','oscillation','setpoint','loop']},
-  {id:'KB-06', cat:'Power / Electrical', title:'UPS does not hold load during brownout', views:167, mins:5,
-    body:'If the UPS drops the load during a brownout, check battery health (most batteries last 3-5 years) and run a self-test. Confirm the input voltage window is configured for local grid conditions. Verify the connected load is within capacity and that critical control hardware is on protected outlets only. Replace aged battery strings proactively.',
-    tags:['ups','power','brownout','battery','outage']},
-  {id:'KB-07', cat:'Software / Reports', title:'Cannot log in to reporting dashboard', views:143, mins:4,
-    body:'Login failures are usually credential, session, or connectivity related. Confirm the username and reset the password if needed, clear the browser cache, and verify the backend service is reachable. If using Starlink/CGNAT, authentication services can be blocked — try a different connection to re-authenticate, then return to normal. Check that the account is active and has a role assigned.',
-    tags:['login','dashboard','password','report','account']},
-  {id:'KB-08', cat:'Web Apps', title:'Web app deployed to GitHub Pages shows 404 or blank screen', views:176, mins:5,
-    body:'A 404 means the file path is wrong; a blank screen means the page loaded but the script failed. For 404: confirm the file is committed to the right branch (usually main), that Pages is enabled for that branch in repo Settings → Pages, and that the URL casing matches the filename exactly (GitHub Pages is case-sensitive). For a blank screen: open the browser DevTools console (F12) and read the first error — a single JS exception halts the whole single-file app. Allow a minute or two after pushing for the Pages CDN to refresh, and hard-reload (Ctrl/Cmd+Shift+R) to clear the cache.',
-    tags:['web app','github pages','404','blank screen','deploy','console error']},
-  {id:'KB-09', cat:'Web Apps', title:'PWA will not install or update / Google Sheets backend not loading', views:158, mins:6,
-    body:'If the install prompt never appears, the app must be served over HTTPS with a valid manifest and a registered service worker — GitHub Pages provides HTTPS automatically. To force an update, bump the service-worker cache name so the browser fetches fresh files, then close all tabs and relaunch. If the Apps Script / Google Sheets backend will not load, confirm the Web App is deployed with access set to "Anyone" and that the /exec URL (not /dev) is pasted into Settings. On Starlink/CGNAT, Google auth and Apps Script calls can be blocked — re-authenticate on mobile data, then switch back. Check the DevTools Network tab for CORS or 401/403 responses.',
-    tags:['pwa','install','service worker','apps script','google sheets','offline','cors']}
+/* Compact reference set for similarity (representative past cases + KB) */
+const REF = [
+  {id:'NX-1042', label:'Boiler control PLC tripped to STOP — production halted', text:'siemens s7-1200 plc stop mode boiler feedwater production down urgent sf led'},
+  {id:'NX-1041', label:'PROFINET intermittent disconnect on kiln drive network', text:'profinet network switch disconnect timeout kiln drive intermittent diagnostic'},
+  {id:'NX-1040', label:'Conveyor VFD trips on overcurrent during startup', text:'vfd drive motor overcurrent trip conveyor startup parameters frequent'},
+  {id:'NX-1039', label:'PID loop on cooler oscillating around setpoint', text:'pid loop tuning oscillation setpoint cooler temperature unstable control manual'},
+  {id:'NX-1038', label:'4-20mA pressure transmitter reading drifting', text:'4-20ma pressure transmitter calibration drift sensor signal reading'},
+  {id:'NX-1037', label:'Cannot log in to production reporting dashboard', text:'login dashboard report password account cannot access starlink'},
+  {id:'NX-1036', label:'WinCC HMI showing #### on turbine tags', text:'wincc hmi scada tag value display turbine plc offline comms'},
+  {id:'NX-1043', label:'Booking PWA shows blank screen after GitHub Pages deploy', text:'web app pwa blank white screen github pages deploy console error google sheets'},
+  {id:'KB-01', label:'KB · Siemens S7-1200 goes to STOP mode unexpectedly', text:'siemens s7-1200 plc stop mode diagnostic buffer tia portal cpu fault watchdog'},
+  {id:'KB-02', label:'KB · PROFINET device intermittently disconnects', text:'profinet network disconnect switch cable shielding grounding watchdog timeout'},
+  {id:'KB-03', label:'KB · VFD trips on overcurrent during start', text:'vfd overcurrent trip motor acceleration ramp drive parameters'},
+  {id:'KB-04', label:'KB · 4-20mA transmitter reading drifts over time', text:'4-20ma transmitter calibration drift loop resistance two-point'},
+  {id:'KB-05', label:'KB · PID loop oscillates around setpoint', text:'pid loop oscillation tuning proportional gain setpoint dead time'},
+  {id:'KB-06', label:'KB · UPS does not hold load during brownout', text:'ups power brownout battery load voltage outage'},
+  {id:'KB-07', label:'KB · Cannot log in to reporting dashboard', text:'login dashboard password report account session starlink cgnat'},
+  {id:'KB-08', label:'KB · Web app on GitHub Pages shows 404 or blank screen', text:'web app github pages 404 blank screen deploy console error branch casing'},
+  {id:'KB-09', label:'KB · PWA will not install / Google Sheets backend not loading', text:'pwa install service worker apps script google sheets offline cors https'}
 ];
 
-/* ================================================================
-   STORAGE / API LAYER  (stale-while-revalidate)
-================================================================ */
-const Store = {
-  cache(){ try{return JSON.parse(localStorage.getItem(CONFIG.CACHE_KEY))||null}catch(e){return null} },
-  setCache(d){ localStorage.setItem(CONFIG.CACHE_KEY, JSON.stringify({...d, _ts:Date.now()})); },
-
-  async loadTickets(){
-    // 1) serve cache instantly
-    const c = this.cache();
-    if(c && c.tickets){ State.tickets = c.tickets; }
-    else { State.tickets = SEED.tickets(); this.setCache({tickets:State.tickets}); }
-
-    // 2) revalidate from Sheets if configured
-    if(CONFIG.API_URL){
-      UI.setConn('syncing','Syncing…');
-      try{
-        const r = await fetch(`${CONFIG.API_URL}?action=list`, {redirect:'follow'});
-        const j = await r.json();
-        if(j && Array.isArray(j.tickets)){
-          State.tickets = j.tickets.map(normalizeTicket);
-          this.setCache({tickets:State.tickets});
-          UI.setConn('online','Synced · Sheets');
-          if(App.current==='tickets'||App.current==='dashboard') App.render();
-        }
-      }catch(e){ UI.setConn('offline','Offline · cached'); }
-    } else {
-      UI.setConn('demo','Demo mode');
-    }
-  },
-
-  async saveTicket(t){
-    // optimistic local write
-    const i = State.tickets.findIndex(x=>x.id===t.id);
-    if(i>=0) State.tickets[i]=t; else State.tickets.unshift(t);
-    this.setCache({tickets:State.tickets});
-    if(CONFIG.API_URL){
-      UI.setConn('syncing','Saving…');
-      try{
-        await fetch(CONFIG.API_URL, {method:'POST', redirect:'follow',
-          headers:{'Content-Type':'text/plain;charset=utf-8'},
-          body:JSON.stringify({action:'upsert', ticket:t})});
-        UI.setConn('online','Saved · Sheets');
-      }catch(e){ UI.setConn('offline','Saved locally'); }
-    }
-  }
-};
-function normalizeTicket(t){
-  return {...t,
-    priority:(t.priority||'medium').toLowerCase(),
-    status:(t.status||'open').toLowerCase(),
-    thread: typeof t.thread==='string'? safeJSON(t.thread,[]) : (t.thread||[]),
-    timeline: typeof t.timeline==='string'? safeJSON(t.timeline,[]) : (t.timeline||[])
-  };
-}
-function safeJSON(s,f){try{return JSON.parse(s)}catch(e){return f}}
-
-/* ================================================================
-   ML ENGINE  — client-side, zero-cost intelligence
-================================================================ */
 const ML = {
   tokenize(s){ return (s||'').toLowerCase().replace(/[^a-z0-9\- ]/g,' ').split(/\s+/).filter(Boolean); },
-
-  // --- Category classification (keyword-weighted scoring) ---
   classify(text){
-    const t = ' '+(text||'').toLowerCase()+' ';
-    const scores = {};
-    for(const [cat,kws] of Object.entries(CATEGORIES)){
-      let s=0;
-      kws.forEach(k=>{ if(t.includes(k)) s += (k.length>5?2:1.4); });
-      scores[cat]=s;
-    }
-    const ranked = Object.entries(scores).sort((a,b)=>b[1]-a[1]);
-    const total = ranked.reduce((a,[,v])=>a+v,0)||1;
-    const top = ranked[0];
-    return {
-      category: top[1]>0 ? top[0] : 'General Support',
-      confidence: top[1]>0 ? Math.min(96, Math.round(top[1]/total*100)+38) : 35,
-      ranked: ranked.slice(0,3).map(([c,v])=>({cat:c, pct:Math.round(v/total*100)}))
-    };
+    const t=' '+(text||'').toLowerCase()+' '; const scores={};
+    for(const [cat,kws] of Object.entries(CATEGORIES)){ let s=0; kws.forEach(k=>{ if(t.includes(k)) s+=(k.length>5?2:1.4); }); scores[cat]=s; }
+    const ranked=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+    const total=ranked.reduce((a,[,v])=>a+v,0)||1; const top=ranked[0];
+    return { category: top[1]>0?top[0]:'General Support',
+      confidence: top[1]>0?Math.min(96,Math.round(top[1]/total*100)+38):35,
+      ranked: ranked.slice(0,3).map(([c,v])=>({cat:c,pct:Math.round(v/total*100)})) };
   },
-
-  // --- Priority prediction ---
-  priority(text, clientSla){
-    const t=' '+(text||'').toLowerCase()+' ';
-    let score=40; // baseline = medium
+  priority(text){
+    const t=' '+(text||'').toLowerCase()+' '; let score=40;
     PRIORITY_SIGNALS.critical.forEach(k=>{ if(t.includes(k)) score+=22; });
     PRIORITY_SIGNALS.high.forEach(k=>{ if(t.includes(k)) score+=11; });
     PRIORITY_SIGNALS.low.forEach(k=>{ if(t.includes(k)) score-=14; });
-    if(clientSla==='Critical') score+=14; else if(clientSla==='Priority') score+=7;
-    if(/[A-Z]{4,}/.test(text||'')) score+=4;            // shouting
-    if((text||'').includes('!')) score+=3;
+    if(/[A-Z]{4,}/.test(text||'')) score+=4; if((text||'').includes('!')) score+=3;
     score=Math.max(8,Math.min(99,score));
-    let level = score>=78?'critical': score>=55?'high': score>=30?'medium':'low';
-    return {level, score:Math.round(score)};
+    let level=score>=78?'critical':score>=55?'high':score>=30?'medium':'low';
+    return {level,score:Math.round(score)};
   },
-
-  // --- Sentiment (lexicon) ---
   sentiment(text){
-    const toks=this.tokenize(text); let s=0;
-    const t=' '+(text||'').toLowerCase()+' ';
-    NEG_WORDS.forEach(w=>{ if(t.includes(w)) s-=1; });
-    POS_WORDS.forEach(w=>{ if(t.includes(w)) s+=1; });
-    const label = s<=-2?'Frustrated': s<0?'Concerned': s>0?'Positive':'Neutral';
-    const score = Math.max(0,Math.min(100, 50 + s*16));
-    return {label, score};
+    const t=' '+(text||'').toLowerCase()+' '; let s=0;
+    NEG_WORDS.forEach(w=>{ if(t.includes(w)) s-=1; }); POS_WORDS.forEach(w=>{ if(t.includes(w)) s+=1; });
+    const label=s<=-2?'Frustrated':s<0?'Concerned':s>0?'Positive':'Neutral';
+    return {label, score:Math.max(0,Math.min(100,50+s*16))};
   },
-
-  // --- Resolution time estimate (priority + category history) ---
-  resolveEstimate(priority, category){
-    const base = CONFIG.SLA_HOURS[priority] || 24;
-    const complexity = {'PLC / Controller':1.3,'SCADA / HMI':1.15,'Network / OT':1.25,
-      'Instrumentation':1.1,'Drives / Motor':1.2,'Power / Electrical':1.35,
-      'Software / Reports':.8,'Process / Tuning':1.4,'Web Apps':.85,'General Support':.9}[category]||1;
-    const hrs = Math.max(1, Math.round(base*0.55*complexity));
-    return {hours:hrs, sla:base};
+  resolveEstimate(priority,category){
+    const base=CONFIG.SLA_HOURS[priority]||24;
+    const complexity={'PLC / Controller':1.3,'SCADA / HMI':1.15,'Network / OT':1.25,'Instrumentation':1.1,
+      'Drives / Motor':1.2,'Power / Electrical':1.35,'Software / Reports':.8,'Process / Tuning':1.4,'Web Apps':.85,'General Support':.9}[category]||1;
+    return {hours:Math.max(1,Math.round(base*0.55*complexity)), sla:base};
   },
-
-  // --- TF-IDF cosine similarity against existing tickets + KB ---
-  vectorize(text){
-    const toks=this.tokenize(text); const v={};
-    toks.forEach(t=>{ if(t.length>2) v[t]=(v[t]||0)+1; });
-    return v;
-  },
-  cosine(a,b){
-    let dot=0,na=0,nb=0;
-    for(const k in a){ na+=a[k]*a[k]; if(b[k]) dot+=a[k]*b[k]; }
-    for(const k in b){ nb+=b[k]*b[k]; }
-    return (na&&nb)? dot/Math.sqrt(na*nb) : 0;
-  },
-  similar(text, limit=3){
-    const qv=this.vectorize(text);
-    const pool=[
-      ...State.tickets.map(t=>({id:t.id, label:t.subject, text:t.subject+' '+(t.body||''), type:'ticket'})),
-      ...KB.map(k=>({id:k.id, label:k.title, text:k.title+' '+k.body, type:'kb'}))
-    ];
-    return pool.map(p=>({...p, score:this.cosine(qv,this.vectorize(p.text))}))
-      .filter(p=>p.score>0.04).sort((a,b)=>b.score-a.score).slice(0,limit);
-  },
-
-  // Full triage bundle for the live console
-  triage(subject, body, clientSla){
-    const text=(subject||'')+' '+(body||'');
-    const cls=this.classify(text);
-    const pri=this.priority(text, clientSla);
-    const sent=this.sentiment(text);
-    const est=this.resolveEstimate(pri.level, cls.category);
-    const sim=this.similar(text,3);
-    return {cls,pri,sent,est,sim};
-  }
+  vectorize(text){ const toks=this.tokenize(text); const v={}; toks.forEach(t=>{ if(t.length>2) v[t]=(v[t]||0)+1; }); return v; },
+  cosine(a,b){ let dot=0,na=0,nb=0; for(const k in a){ na+=a[k]*a[k]; if(b[k]) dot+=a[k]*b[k]; } for(const k in b){ nb+=b[k]*b[k]; } return (na&&nb)?dot/Math.sqrt(na*nb):0; },
+  similar(text,limit=3){ const qv=this.vectorize(text);
+    return REF.map(p=>({...p,score:this.cosine(qv,this.vectorize(p.text))})).filter(p=>p.score>0.04).sort((a,b)=>b.score-a.score).slice(0,limit); }
 };
 
-/* ================================================================
-   SEED DATA
-================================================================ */
-const SEED = {
-  tickets(){
-    const now=Date.now(), H=3600000;
-    const mk=(o)=>{
-      const tri=ML.triage(o.subject,o.body,clientSla(o.client));
-      return {
-        id:o.id, subject:o.subject, body:o.body, client:o.client, contact:o.contact||'Operations',
-        category:o.category||tri.cls.category, priority:o.priority||tri.pri.level,
-        status:o.status||'open', assignee:o.assignee||'', created:o.created,
-        updated:o.updated||o.created, sentiment:tri.sent.label, ai_conf:tri.cls.confidence,
-        thread:o.thread||[{by:o.contact||'Operations', role:'client', at:o.created, text:o.body}],
-        timeline:o.timeline||[{at:o.created, text:'Ticket created · auto-triaged by NEXDESK AI'}]
-      };
-    };
-    return [
-      mk({id:'NX-1042', client:'SMC Power (SMBC)', contact:'Control Room', created:now-2*H,
-        subject:'Unit 2 boiler control PLC tripped to STOP — production halted',
-        body:'The Siemens S7-1200 controlling Unit 2 boiler feedwater dropped to STOP mode at 0400. Plant is down, this is urgent. SF LED is on. We need immediate support to restore the line.',
-        priority:'critical', status:'progress', assignee:'A1'}),
-      mk({id:'NX-1041', client:'Republic Cement', contact:'Maintenance', created:now-6*H,
-        subject:'PROFINET intermittent disconnect on kiln drive network',
-        body:'The kiln area switch keeps dropping a PROFINET device every few hours. Alarm appears then clears. Intermittent and getting more frequent. Network timeout errors in the diagnostic buffer.',
-        priority:'high', status:'progress', assignee:'A2'}),
-      mk({id:'NX-1040', client:'Semirara Mining (SMPC)', contact:'E&I Team', created:now-11*H,
-        subject:'Conveyor VFD trips on overcurrent during startup',
-        body:'Main conveyor drive trips on overcurrent every time we start it. Motor seems fine, no mechanical jam visible. Frequent trips. Need help with the drive parameters.',
-        priority:'high', status:'open', assignee:''}),
-      mk({id:'NX-1039', client:'Holcim Philippines', contact:'Process Eng', created:now-26*H,
-        subject:'PID loop on cooler oscillating around setpoint',
-        body:'The clinker cooler temperature loop is oscillating and never settles. Operators putting it in manual. Would like help tuning the PID controller for a stable response.',
-        priority:'medium', status:'waiting', assignee:'A3'}),
-      mk({id:'NX-1038', client:'NGCP', contact:'Substation Ops', created:now-30*H,
-        subject:'4-20mA pressure transmitter reading drifting',
-        body:'Pressure transmitter on the SF6 system reading is drifting slowly over the week. Suspect calibration. Please advise on recalibration procedure.',
-        priority:'medium', status:'open', assignee:'A4'}),
-      mk({id:'NX-1037', client:'Coca-Cola Beverages', contact:'IT/OT', created:now-2*24*H,
-        subject:'Cannot log in to production reporting dashboard',
-        body:'Two operators cannot log in to the daily reporting dashboard since yesterday. Password reset did not help. Everyone else is fine.',
-        priority:'low', status:'resolved', assignee:'A5',
-        thread:[{by:'IT/OT', role:'client', at:now-2*24*H, text:'Two operators cannot log in to the daily reporting dashboard since yesterday.'},
-                {by:'Liza Tan', role:'agent', at:now-46*H, text:'Both accounts were on Starlink/CGNAT which blocked Google auth. Had them re-authenticate on mobile data, then switch back. Resolved.'}],
-        timeline:[{at:now-2*24*H,text:'Ticket created · auto-triaged'},{at:now-47*H,text:'Assigned to Liza Tan'},{at:now-46*H,text:'Status → Resolved'}]}),
-      mk({id:'NX-1036', client:'National Power Corp (NPC)', contact:'Plant Ops', created:now-3*24*H,
-        subject:'WinCC HMI showing #### on turbine tags',
-        body:'Several turbine monitoring tags on the WinCC HMI show #### instead of values. PLC seems online. Operators cannot see real data.',
-        priority:'high', status:'resolved', assignee:'A3'}),
-      mk({id:'NX-1043', client:'Appetina Catering', contact:'Operations', created:now-4*H,
-        subject:'Booking PWA shows blank screen after latest deploy on GitHub Pages',
-        body:'After pushing the latest update, the customer booking web app loads a white screen on mobile. Worked fine yesterday. Suspect a console error in the single-file HTML, and the Google Sheets backend may not be connecting. Need this back up — customers cannot book.',
-        priority:'high', status:'open', assignee:''}),
-      mk({id:'NX-1035', client:'Pilipinas Kao', contact:'Maintenance', created:now-4*24*H,
-        subject:'Request: training session on S7-1200 diagnostics',
-        body:'We would like to schedule a training session for our team on reading the S7-1200 diagnostic buffer and basic troubleshooting. Please advise availability.',
-        priority:'low', status:'closed', assignee:'A1'})
-    ];
-  }
-};
-function clientSla(name){ const c=CLIENTS.find(c=>c.name===name); return c?c.sla:'Standard'; }
-function agentBy(id){ return AGENTS.find(a=>a.id===id)||null; }
-
-/* ================================================================
-   GLOBAL STATE
-================================================================ */
-const State = {
-  tickets:[], current:'dashboard', filter:{status:'all', q:''}, openTicket:null, user:AGENTS[0]
+const ICONS = {
+  spinner:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M2 12h4M4.9 19.1l2.8-2.8"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+  err:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>',
+  warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>'
 };
 
-/* ================================================================
-   UI HELPERS
-================================================================ */
-const UI = {
-  toggleSidebar(open){ const sb=document.getElementById('sidebar'), bd=document.getElementById('sbBackdrop');
-    sb.classList.toggle('open',open); bd.classList.toggle('show',open); },
-  setConn(state,txt){ const p=document.getElementById('connPill');
-    p.className='conn '+(state==='offline'?'offline':state==='syncing'?'syncing':'');
-    document.getElementById('connTxt').textContent=txt; },
-  toast(title,sub,type='info'){
-    const w=document.getElementById('toastWrap');
-    const ic=type==='ok'?ICON.check:type==='err'?ICON.alert:ICON.spark;
-    const el=document.createElement('div'); el.className='toast '+type;
-    el.innerHTML=`${svg(ic)}<div><div class="tt">${title}</div>${sub?`<div class="ts">${sub}</div>`:''}</div>`;
-    w.appendChild(el); setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(40px)';setTimeout(()=>el.remove(),250);},3200);
-  },
-  modal(html){ document.getElementById('modal').innerHTML=html; document.getElementById('modalBg').classList.add('open'); },
-  closeModal(){ document.getElementById('modalBg').classList.remove('open'); }
-};
-
-/* ---------- shared render bits ---------- */
-function priChip(p){ const m={critical:'CRITICAL',high:'HIGH',medium:'MEDIUM',low:'LOW'};
-  return `<span class="chip pri-${p}"><span class="pip"></span>${m[p]||p}</span>`; }
-function stChip(s){ const m={open:['st-open','OPEN'],progress:['st-progress','IN PROGRESS'],
-  waiting:['st-waiting','AWAITING CLIENT'],resolved:['st-resolved','RESOLVED'],closed:['st-closed','CLOSED']};
-  const x=m[s]||['st-open',s.toUpperCase()]; return `<span class="chip ${x[0]}"><span class="pip"></span>${x[1]}</span>`; }
-function avatar(id,size){ const a=agentBy(id); const init=a?a.init:'—';
-  return `<span class="avatar"${size?` style="width:${size}px;height:${size}px;font-size:${size*.42}px"`:''}>${init}</span>`; }
-function ago(ts){ const s=(Date.now()-ts)/1000;
-  if(s<60)return'just now'; if(s<3600)return Math.floor(s/60)+'m ago';
-  if(s<86400)return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
-function slaInfo(t){
-  const target=CONFIG.SLA_HOURS[t.priority]*3600000;
-  const elapsed=Date.now()-t.created;
-  const pct=Math.min(100,Math.round(elapsed/target*100));
-  const done=['resolved','closed'].includes(t.status);
-  const color = done?'var(--ok)': pct>=100?'var(--crit)': pct>=75?'var(--high)':'var(--teal)';
-  const left = done?'Met':(pct>=100?'BREACHED':`${Math.max(0,Math.round((target-elapsed)/3600000))}h left`);
-  return {pct:done?100:pct,color,left,breached:!done&&pct>=100};
-}
-
-/* ================================================================
-   APP / ROUTER
-================================================================ */
+/* ════════════════════════════════════════════════════════════
+   APP
+════════════════════════════════════════════════════════════ */
 const App = {
-  current:'dashboard',
-  NAV:[
-    {id:'dashboard', label:'Dashboard', icon:'grid'},
-    {id:'tickets', label:'Tickets', icon:'ticket', badge:()=>State.tickets.filter(t=>!['resolved','closed'].includes(t.status)).length},
-    {id:'kb', label:'Knowledge Base', icon:'book'},
-    {id:'clients', label:'Clients', icon:'users'},
-    {id:'analytics', label:'Analytics', icon:'chart'}
-  ],
+  priority:'medium', aiPriority:null, manualPriority:false, _t:null,
 
-  init(){
-    this.renderSidebar();
-    Chat.mount();
-    Store.loadTickets().then(()=>this.render());
-    this.render();
-    if(CONFIG.API_URL) setInterval(()=>Store.loadTickets(), CONFIG.POLL_MS);
+  val(id){ return (document.getElementById(id).value||'').trim(); },
+
+  setPriority(p, manual){
+    this.priority=p; if(manual){ this.manualPriority=true; }
+    document.querySelectorAll('.pri-opt').forEach(el=>el.classList.toggle('sel', el.dataset.p===p));
   },
 
-  go(view){ this.current=view; State.current=view; this.renderSidebar(); this.render(); UI.toggleSidebar(false);
-    document.getElementById('viewRoot').scrollTop=0; window.scrollTo(0,0); },
-
-  renderSidebar(){
-    const items=this.NAV.map(n=>{
-      const b=n.badge?n.badge():null;
-      return `<a class="nav-item ${this.current===n.id?'active':''}" onclick="App.go('${n.id}')">
-        ${svg(ICON[n.icon])}<span>${n.label}</span>${b!=null?`<span class="badge">${b}</span>`:''}</a>`;
-    }).join('');
-    document.getElementById('sidebar').innerHTML=`
-      <div class="brand">
-        <div class="logo">${svg('<path d="M30 70V30h8l24 26V30h8v40h-8L38 44v26z" fill="#2DE2C0" stroke="none"/>')}</div>
-        <div><h1>NEXDESK</h1><div class="sub">Support Ops</div></div>
-      </div>
-      <nav class="nav">
-        <div class="nav-label">Operations</div>${items}
-        <div class="nav-label">System</div>
-        <a class="nav-item ${this.current==='settings'?'active':''}" onclick="App.go('settings')">${svg(ICON.gear)}<span>Settings</span></a>
-        <a class="nav-item" onclick="Chat.toggle()">${svg(ICON.bot)}<span>AI Assistant</span></a>
-      </nav>
-      <div class="sb-foot"><div class="user-card">
-        <span class="avatar">${State.user.init}</span>
-        <div><div class="nm">${State.user.name}</div><div class="rl">${State.user.role}</div></div>
-      </div></div>`;
-    // mobile nav
-    document.getElementById('mobNav').innerHTML=this.NAV.slice(0,4).concat([{id:'settings',label:'More',icon:'gear'}])
-      .map(n=>`<button class="${this.current===n.id?'active':''}" onclick="App.go('${n.id}')">${svg(ICON[n.icon])}<span>${n.label}</span></button>`).join('');
+  onTriageInput(){
+    clearTimeout(this._t);
+    const st=document.getElementById('triageStatus'); const stt=document.getElementById('triageStatusText');
+    st.classList.add('ready'); stt.textContent='Analyzing…';
+    this._t=setTimeout(()=>this.runTriage(), 280);
   },
 
-  render(){
-    const root=document.getElementById('viewRoot');
-    root.innerHTML = ({
-      dashboard:Views.dashboard, tickets:Views.tickets, ticket:Views.ticketDetail,
-      kb:Views.kb, clients:Views.clients, analytics:Views.analytics, settings:Views.settings
-    }[this.current]||Views.dashboard)();
-    if(this.current==='analytics') requestAnimationFrame(()=>Charts.drawAll());
-    if(this.current==='dashboard') requestAnimationFrame(()=>Charts.drawTrend('miniTrend'));
-  },
-
-  globalSearch(q){
-    State.filter.q=q.trim().toLowerCase();
-    if(q && this.current!=='tickets'){ this.current='tickets'; this.renderSidebar(); }
-    if(this.current==='tickets') this.render();
-  },
-
-  openTicket(id){ State.openTicket=State.tickets.find(t=>t.id===id); if(State.openTicket){ this.go('ticket'); } },
-  openNewTicket(){ Modals.newTicket(); }
-};
-
-/* ================================================================
-   VIEWS
-================================================================ */
-const Views = {
-
-  /* ---------- DASHBOARD ---------- */
-  dashboard(){
-    const T=State.tickets;
-    const open=T.filter(t=>!['resolved','closed'].includes(t.status));
-    const crit=open.filter(t=>t.priority==='critical').length;
-    const breached=open.filter(t=>slaInfo(t).breached).length;
-    const resolvedToday=T.filter(t=>t.status==='resolved'&&Date.now()-t.updated<86400000).length;
-    const avgRes='6.4h';
-    const recent=[...open].sort((a,b)=>b.created-a.created).slice(0,6);
-    const queueByPri=['critical','high','medium','low'].map(p=>({p,n:open.filter(t=>t.priority===p).length}));
-
-    return `<div class="view">
-      <div class="view-head">
-        <div><div class="eyebrow">Live operations · ${CONFIG.ORG}</div>
-          <h2>Support Console</h2>
-          <p>Real-time ticket health, SLA tracking, and AI triage across all active engagements.</p></div>
-        <button class="btn btn-ghost btn-sm" onclick="App.go('analytics')">${svg(ICON.trend)} Full analytics</button>
-      </div>
-
-      <div class="kpi-grid">
-        <div class="kpi"><div class="lab">${svg(ICON.inbox)} Open tickets</div>
-          <div class="val">${open.length}</div><div class="delta up">${svg(ICON.trend)} ${resolvedToday} resolved today</div></div>
-        <div class="kpi ${crit?'alert':''}"><div class="lab">${svg(ICON.alert)} Critical active</div>
-          <div class="val">${crit}</div><div class="delta">${crit?'Requires immediate attention':'All clear'}</div></div>
-        <div class="kpi ${breached?'warn':''}"><div class="lab">${svg(ICON.clock)} SLA at risk</div>
-          <div class="val">${breached}</div><div class="delta">Within target window</div></div>
-        <div class="kpi"><div class="lab">${svg(ICON.pulse)} Avg resolution</div>
-          <div class="val">${avgRes}</div><div class="delta up">${svg(ICON.trend)} 12% faster vs last wk</div></div>
-      </div>
-
-      <div class="grid-2">
-        <div class="panel">
-          <div class="panel-head"><h3>${svg(ICON.ticket)} Active queue</h3>
-            <button class="btn btn-ghost btn-sm" onclick="App.go('tickets')">View all →</button></div>
-          <div class="tk-list">
-            ${recent.map(t=>{return `
-              <div class="tk-row compact" onclick="App.openTicket('${t.id}')">
-                <span class="tk-id">${t.id}</span>
-                <div style="min-width:0">
-                  <div class="tk-subj">${t.subject}</div>
-                  <div class="tk-meta"><span>${t.client}</span><span>·</span><span>${ago(t.created)}</span></div>
-                </div>
-                ${priChip(t.priority)}
-              </div>`;}).join('')}
-          </div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <div class="panel">
-            <div class="panel-head"><h3>${svg(ICON.flag)} Queue by priority</h3></div>
-            <div class="panel-body" style="display:flex;flex-direction:column;gap:13px">
-              ${queueByPri.map(({p,n})=>{const max=Math.max(...queueByPri.map(x=>x.n),1);
-                const col={critical:'var(--crit)',high:'var(--high)',medium:'var(--med)',low:'var(--low)'}[p];
-                return `<div><div style="display:flex;justify-content:space-between;margin-bottom:6px">
-                  ${priChip(p)}<span class="mono" style="font-size:13px;font-weight:600">${n}</span></div>
-                  <div class="gauge"><div class="track"><div class="fill" style="width:${n/max*100}%;background:${col};box-shadow:0 0 10px ${col}"></div></div></div></div>`;}).join('')}
-            </div>
-          </div>
-          <div class="panel">
-            <div class="panel-head"><h3>${svg(ICON.trend)} 7-day inflow</h3></div>
-            <div class="panel-body"><div class="chart-wrap" style="height:140px"><canvas id="miniTrend"></canvas></div></div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  },
-
-  /* ---------- TICKETS ---------- */
-  tickets(){
-    const f=State.filter;
-    let list=[...State.tickets];
-    if(f.status!=='all') list=list.filter(t=> f.status==='active'?!['resolved','closed'].includes(t.status):t.status===f.status);
-    if(f.q) list=list.filter(t=>(t.id+t.subject+t.client+t.body+t.category).toLowerCase().includes(f.q));
-    list.sort((a,b)=>{const o={critical:0,high:1,medium:2,low:3};
-      if(o[a.priority]!==o[b.priority])return o[a.priority]-o[b.priority]; return b.created-a.created;});
-
-    return `<div class="view">
-      <div class="view-head"><div><div class="eyebrow">Ticket queue</div><h2>Tickets</h2>
-        <p>${list.length} of ${State.tickets.length} tickets shown · sorted by priority</p></div>
-        <button class="btn btn-primary" onclick="App.openNewTicket()">${svg('<line x1="12" y1="5" x2="12" y2="19" stroke-width="2.2"/><line x1="5" y1="12" x2="19" y2="12" stroke-width="2.2"/>')} New ticket</button>
-      </div>
-
-      <div class="tk-toolbar">
-        <div class="seg">
-          ${[['all','All'],['active','Active'],['open','Open'],['progress','In progress'],['waiting','Waiting'],['resolved','Resolved']]
-            .map(([k,l])=>`<button class="${f.status===k?'on':''}" onclick="State.filter.status='${k}';App.render()">${l}</button>`).join('')}
-        </div>
-        <input class="fld" placeholder="Filter…" value="${f.q}" oninput="State.filter.q=this.value.toLowerCase();App.render()" style="flex:1;min-width:140px">
-      </div>
-
-      ${list.length?`<div class="tk-list">
-        ${list.map(t=>{const s=slaInfo(t);return `
-          <div class="tk-row" onclick="App.openTicket('${t.id}')">
-            <span class="tk-id">${t.id}</span>
-            <div style="min-width:0">
-              <div class="tk-subj">${t.subject}</div>
-              <div class="tk-meta"><span>${t.client}</span><span>·</span><span>${t.category}</span><span>·</span><span>${ago(t.created)}</span></div>
-            </div>
-            <div class="col-hide">${priChip(t.priority)}</div>
-            <div class="col-hide">${stChip(t.status)}</div>
-            <div class="col-hide"><div class="sla-txt" style="color:${s.color}">${s.left}</div>
-              <div class="sla-bar"><i style="width:${s.pct}%;background:${s.color}"></i></div></div>
-            <div class="tk-assignee col-hide">${t.assignee?avatar(t.assignee,26):'<span class="muted mono" style="font-size:11px">—</span>'}</div>
-          </div>`;}).join('')}
-      </div>`:`<div class="empty">${svg(ICON.inbox)}<h4>No tickets match</h4><p>Try a different filter or clear your search.</p></div>`}
-    </div>`;
-  },
-
-  /* ---------- TICKET DETAIL ---------- */
-  ticketDetail(){
-    const t=State.openTicket; if(!t) return Views.tickets();
-    const s=slaInfo(t); const tri=ML.triage(t.subject,t.body,clientSla(t.client));
-    return `<div class="view">
-      <div class="view-head"><div>
-        <div class="eyebrow" style="cursor:pointer" onclick="App.go('tickets')">← Back to tickets</div>
-        <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="mono" style="color:var(--teal);font-size:18px">${t.id}</span> ${priChip(t.priority)} ${stChip(t.status)}</h2>
-        <p style="font-size:16px;color:var(--ink);font-weight:600;margin-top:8px">${t.subject}</p></div>
-      </div>
-
-      <div class="detail-grid">
-        <div style="display:flex;flex-direction:column;gap:18px">
-          <div class="panel"><div class="panel-head"><h3>${svg(ICON.inbox)} Conversation</h3>
-            <span class="mono muted" style="font-size:11px">${t.thread.length} messages</span></div>
-            <div class="panel-body"><div class="thread">
-              ${t.thread.map(m=>`<div class="msg ${m.role==='agent'?'agent':''}">
-                ${m.role==='agent'?'<span class="avatar">'+(AGENTS.find(a=>a.name===m.by)?.init||'NX')+'</span>':'<span class="avatar" style="background:linear-gradient(135deg,#37465e,#2a3346)">'+(m.by[0]||'C')+'</span>'}
-                <div class="bubble"><div class="bh"><span class="who">${m.by}</span>
-                  <span class="chip ${m.role==='agent'?'st-resolved':'st-open'}" style="font-size:9px;padding:2px 7px">${m.role==='agent'?'AGENT':'CLIENT'}</span>
-                  <span class="when">${ago(m.at)}</span></div>
-                  <div class="txt">${m.text}</div></div></div>`).join('')}
-            </div>
-            <div style="margin-top:16px;display:flex;gap:10px">
-              <input class="fld" id="replyBox" placeholder="Write a reply…" style="flex:1" onkeydown="if(event.key==='Enter')App.sendReply()">
-              <button class="btn btn-primary" onclick="App.sendReply()">${svg(ICON.send)} Send</button>
-            </div></div>
-          </div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:16px">
-          <div class="panel"><div class="panel-head"><h3>${svg(ICON.gear)} Details</h3></div>
-            <div class="panel-body"><div class="meta-list">
-              <div class="meta-row"><span class="k">Client</span><span style="font-weight:600">${t.client}</span></div>
-              <div class="meta-row"><span class="k">Contact</span><span>${t.contact}</span></div>
-              <div class="meta-row"><span class="k">Category</span><span>${t.category}</span></div>
-              <div class="meta-row"><span class="k">Priority</span>
-                <select class="fld" style="padding:5px 9px" onchange="App.updateField('priority',this.value)">
-                  ${['critical','high','medium','low'].map(p=>`<option ${t.priority===p?'selected':''}>${p}</option>`).join('')}</select></div>
-              <div class="meta-row"><span class="k">Status</span>
-                <select class="fld" style="padding:5px 9px" onchange="App.updateField('status',this.value)">
-                  ${[['open','Open'],['progress','In progress'],['waiting','Waiting'],['resolved','Resolved'],['closed','Closed']].map(([v,l])=>`<option value="${v}" ${t.status===v?'selected':''}>${l}</option>`).join('')}</select></div>
-              <div class="meta-row"><span class="k">Assignee</span>
-                <select class="fld" style="padding:5px 9px" onchange="App.updateField('assignee',this.value)">
-                  <option value="">Unassigned</option>${AGENTS.map(a=>`<option value="${a.id}" ${t.assignee===a.id?'selected':''}>${a.name}</option>`).join('')}</select></div>
-              <div class="meta-row"><span class="k">SLA</span><span style="color:${s.color};font-weight:600">${s.left}</span></div>
-              <div class="meta-row"><span class="k">Created</span><span class="mono" style="font-size:11px">${new Date(t.created).toLocaleString()}</span></div>
-            </div></div>
-          </div>
-
-          <div class="triage"><div class="triage-head">${svg(ICON.spark,'')}<span class="ttl">AI Triage</span>
-            <span class="live"><span class="dot"></span>ANALYZED</span></div>
-            <div class="readout">
-              <div class="conf-row">
-                <span class="conf-tag">Category <b>${tri.cls.confidence}%</b></span>
-                <span class="conf-tag">Sentiment <b>${tri.sent.label}</b></span>
-                <span class="conf-tag">Est. resolve <b>${tri.est.hours}h</b></span>
-              </div>
-              ${tri.sim.length?`<div><div class="gl" style="font-family:var(--f-mono);font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Related cases</div>
-                ${tri.sim.map(x=>`<div class="sim-item" onclick="${x.type==='kb'?`Modals.kbArticle('${x.id}')`:`App.openTicket('${x.id}')`}" style="cursor:pointer">
-                  <span class="id">${x.id}</span><span class="mt">${x.label}</span><span class="pct">${Math.round(x.score*100)}%</span></div>`).join('')}</div>`:''}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-  },
-
-  /* ---------- KNOWLEDGE BASE ---------- */
-  kb(){
-    return `<div class="view">
-      <div class="view-head"><div><div class="eyebrow">Self-service · ${KB.length} articles</div><h2>Knowledge Base</h2>
-        <p>Field-tested troubleshooting guides across PLC, SCADA, network, instrumentation and drives.</p></div></div>
-      <div class="search" style="max-width:520px;margin-bottom:20px">
-        ${svg('<circle cx="11" cy="11" r="7" stroke-width="2"/><line x1="21" y1="21" x2="16.5" y2="16.5" stroke-width="2"/>')}
-        <input id="kbSearch" placeholder="Search articles by symptom, equipment, or keyword…" oninput="Views._kbFilter(this.value)">
-      </div>
-      <div class="kb-grid" id="kbGrid">${this._kbCards(KB)}</div>
-    </div>`;
-  },
-  _kbCards(list){ return list.length?list.map(k=>`
-    <div class="kb-card" onclick="Modals.kbArticle('${k.id}')">
-      <div class="cat">${k.cat}</div><h4>${k.title}</h4><p>${k.body}</p>
-      <div class="ft"><span>${svg(ICON.clock,'')} ${k.mins} min read</span><span>${k.views} views</span></div>
-    </div>`).join('') : `<div class="empty" style="grid-column:1/-1">${svg(ICON.book)}<h4>No articles found</h4></div>`; },
-  _kbFilter(q){ q=q.toLowerCase();
-    const f=KB.filter(k=>(k.title+k.body+k.tags.join(' ')+k.cat).toLowerCase().includes(q));
-    document.getElementById('kbGrid').innerHTML=this._kbCards(f); },
-
-  /* ---------- CLIENTS ---------- */
-  clients(){
-    return `<div class="view">
-      <div class="view-head"><div><div class="eyebrow">Accounts · ${CLIENTS.length} clients</div><h2>Clients</h2>
-        <p>Active service accounts with SLA tier and live ticket load.</p></div></div>
-      <div class="kb-grid">
-        ${CLIENTS.map(c=>{const tks=State.tickets.filter(t=>t.client===c.name);
-          const open=tks.filter(t=>!['resolved','closed'].includes(t.status)).length;
-          const tierCol={Critical:'var(--crit)',Priority:'var(--high)',Standard:'var(--low)'}[c.sla];
-          return `<div class="kb-card" style="cursor:default">
-            <div style="display:flex;justify-content:space-between;align-items:start">
-              <div><div class="cat">${c.sector}</div><h4 style="margin-top:7px">${c.name}</h4></div>
-              <span class="chip" style="color:${tierCol};background:${tierCol}22">${c.sla} SLA</span>
-            </div>
-            <div style="display:flex;gap:18px;margin-top:14px">
-              <div><div class="mono" style="font-size:22px;font-weight:700;color:${open?'var(--teal)':'var(--muted)'}">${open}</div><div class="muted" style="font-size:11px">open</div></div>
-              <div><div class="mono" style="font-size:22px;font-weight:700">${tks.length}</div><div class="muted" style="font-size:11px">total</div></div>
-            </div></div>`;}).join('')}
-      </div>
-    </div>`;
-  },
-
-  /* ---------- ANALYTICS ---------- */
-  analytics(){
-    const T=State.tickets;
-    const byCat={}; T.forEach(t=>byCat[t.category]=(byCat[t.category]||0)+1);
-    const resolved=T.filter(t=>['resolved','closed'].includes(t.status)).length;
-    const rate=Math.round(resolved/T.length*100);
-    return `<div class="view">
-      <div class="view-head"><div><div class="eyebrow">Insights</div><h2>Analytics</h2>
-        <p>Volume trends, category distribution and resolution performance.</p></div></div>
-      <div class="kpi-grid">
-        <div class="kpi"><div class="lab">${svg(ICON.ticket)} Total tickets</div><div class="val">${T.length}</div><div class="delta">all time</div></div>
-        <div class="kpi"><div class="lab">${svg(ICON.check)} Resolution rate</div><div class="val">${rate}%</div><div class="delta up">${svg(ICON.trend)} healthy</div></div>
-        <div class="kpi"><div class="lab">${svg(ICON.clock)} Avg first response</div><div class="val">38m</div><div class="delta up">within SLA</div></div>
-        <div class="kpi"><div class="lab">${svg(ICON.pulse)} Reopen rate</div><div class="val">4%</div><div class="delta">low</div></div>
-      </div>
-      <div class="grid-2">
-        <div class="panel"><div class="panel-head"><h3>${svg(ICON.trend)} Ticket volume — 14 days</h3></div>
-          <div class="panel-body"><div class="chart-wrap"><canvas id="volChart"></canvas></div></div></div>
-        <div class="panel"><div class="panel-head"><h3>${svg(ICON.chart)} By category</h3></div>
-          <div class="panel-body"><div class="chart-wrap"><canvas id="catChart"></canvas></div>
-            <div class="legend" id="catLegend"></div></div></div>
-      </div>
-      <div class="panel" style="margin-top:16px"><div class="panel-head"><h3>${svg(ICON.pulse)} Resolution time by priority (hrs)</h3></div>
-        <div class="panel-body"><div class="chart-wrap" style="height:200px"><canvas id="resChart"></canvas></div></div></div>
-    </div>`;
-  },
-
-  /* ---------- SETTINGS ---------- */
-  settings(){
-    return `<div class="view">
-      <div class="view-head"><div><div class="eyebrow">Configuration</div><h2>Settings</h2>
-        <p>Connect your Google Sheets backend and tune SLA targets.</p></div></div>
-      <div class="panel" style="margin-bottom:16px"><div class="panel-head"><h3>${svg(ICON.spark)} Google Sheets backend</h3></div>
-        <div class="panel-body">
-          <div class="field"><label>Apps Script Web App URL</label>
-            <input id="apiInput" value="${CONFIG.API_URL}" placeholder="https://script.google.com/macros/s/…/exec">
-          </div>
-          <p class="muted" style="font-size:12.5px;margin:10px 0 16px">Deploy the included <span class="mono">Code.gs</span> as a Web App, then paste the URL here. Leave blank to keep running in offline Demo mode. The console caches all tickets locally and syncs when connected (stale-while-revalidate).</p>
-          <div style="display:flex;gap:10px">
-            <button class="btn btn-primary" onclick="App.saveApi()">${svg(ICON.check)} Save & connect</button>
-            <button class="btn btn-ghost" onclick="App.testApi()">Test connection</button>
-          </div>
-        </div>
-      </div>
-      <div class="panel"><div class="panel-head"><h3>${svg(ICON.clock)} SLA resolution targets</h3></div>
-        <div class="panel-body"><div class="meta-list">
-          ${Object.entries(CONFIG.SLA_HOURS).map(([p,h])=>`<div class="meta-row">
-            <span>${priChip(p)}</span><span class="mono" style="font-weight:600">${h} hours</span></div>`).join('')}
-        </div></div>
-      </div>
-      <p class="muted mono" style="font-size:11px;text-align:center;margin-top:24px;letter-spacing:1px">
-        NEXDESK v1.0 · Powered by Cyrabell / ${CONFIG.ORG}</p>
-    </div>`;
-  }
-};
-
-/* ================================================================
-   APP ACTIONS (ticket mutations + backend config)
-================================================================ */
-Object.assign(App, {
-  sendReply(){
-    const box=document.getElementById('replyBox'); const txt=box.value.trim(); if(!txt)return;
-    const t=State.openTicket;
-    t.thread.push({by:State.user.name, role:'agent', at:Date.now(), text:txt});
-    t.timeline.push({at:Date.now(), text:`Reply from ${State.user.name}`});
-    t.updated=Date.now();
-    Store.saveTicket(t); this.render(); UI.toast('Reply sent','Added to conversation','ok');
-  },
-  updateField(field,val){
-    const t=State.openTicket; const old=t[field];
-    t[field]=val; t.updated=Date.now();
-    t.timeline.push({at:Date.now(), text:`${field.charAt(0).toUpperCase()+field.slice(1)} changed: ${old||'—'} → ${val||'—'}`});
-    Store.saveTicket(t); this.render(); this.renderSidebar();
-    UI.toast('Ticket updated', `${field} → ${val||'unassigned'}`, 'ok');
-  },
-  saveApi(){
-    const url=document.getElementById('apiInput').value.trim();
-    localStorage.setItem('nexdesk_api',url); CONFIG.API_URL=url;
-    UI.toast(url?'Backend connected':'Demo mode', url?'Syncing with Google Sheets…':'Running locally','ok');
-    Store.loadTickets().then(()=>this.render());
-  },
-  async testApi(){
-    const url=document.getElementById('apiInput').value.trim();
-    if(!url){UI.toast('No URL','Enter your Apps Script URL first','err');return;}
-    UI.toast('Testing…','Reaching Google Sheets','info');
-    try{ const r=await fetch(`${url}?action=ping`,{redirect:'follow'}); const j=await r.json();
-      UI.toast('Connection OK', j.org||'Backend responding','ok');
-    }catch(e){ UI.toast('Connection failed','Check the URL & deployment','err'); }
-  }
-});
-
-/* ================================================================
-   MODALS
-================================================================ */
-const Modals = {
-  newTicket(){
-    UI.modal(`
-      <div class="modal-head"><h3>New ticket</h3>
-        <button class="x" onclick="UI.closeModal()">${svg(ICON.x)}</button></div>
-      <div class="modal-body">
-        <div class="grid-2" style="grid-template-columns:1fr 300px;align-items:start;gap:18px">
-          <div class="form-grid">
-            <div class="row-2">
-              <div class="field"><label>Client</label>
-                <select id="ntClient" onchange="Modals._triage()">${CLIENTS.map(c=>`<option>${c.name}</option>`).join('')}</select></div>
-              <div class="field"><label>Contact</label><input id="ntContact" placeholder="e.g. Control Room" value="Operations"></div>
-            </div>
-            <div class="field"><label>Subject</label>
-              <input id="ntSubject" placeholder="Short summary of the issue" oninput="Modals._triage()"></div>
-            <div class="field"><label>Description</label>
-              <textarea id="ntBody" placeholder="Describe the symptom, equipment, and what's happening…" oninput="Modals._triage()"></textarea></div>
-            <div class="row-2">
-              <div class="field"><label>Priority <span style="color:var(--teal)">(AI suggested)</span></label>
-                <select id="ntPriority">${['critical','high','medium','low'].map(p=>`<option value="${p}" ${p==='medium'?'selected':''}>${p}</option>`).join('')}</select></div>
-              <div class="field"><label>Assign to</label>
-                <select id="ntAssignee"><option value="">Unassigned</option>${AGENTS.map(a=>`<option value="${a.id}">${a.name}</option>`).join('')}</select></div>
-            </div>
-          </div>
-          <div class="triage" id="ntTriage">
-            <div class="triage-head">${svg(ICON.spark)}<span class="ttl">Live AI Triage</span>
-              <span class="live"><span class="dot"></span>STANDBY</span></div>
-            <div class="readout" id="ntReadout">
-              <p class="muted" style="font-size:12.5px;text-align:center;padding:20px 0">Start typing a subject or description — the AI will classify, prioritize, and surface related cases in real time.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-foot">
-        <button class="btn btn-ghost" onclick="UI.closeModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="Modals._create()">${svg(ICON.check)} Create ticket</button>
-      </div>`);
-  },
-  _triage(){
-    const subj=document.getElementById('ntSubject').value;
-    const body=document.getElementById('ntBody').value;
-    const client=document.getElementById('ntClient').value;
-    if(!subj && !body){ return; }
-    const tri=ML.triage(subj,body,clientSla(client));
-    // auto-set suggested priority
-    document.getElementById('ntPriority').value=tri.pri.level;
-    const head=document.querySelector('#ntTriage .live');
-    if(head) head.innerHTML='<span class="dot"></span>ANALYZING';
-    const sentCol={Frustrated:'var(--crit)',Concerned:'var(--high)',Neutral:'var(--muted)',Positive:'var(--ok)'}[tri.sent.label];
-    const priCol={critical:'var(--crit)',high:'var(--high)',medium:'var(--med)',low:'var(--low)'}[tri.pri.level];
-    document.getElementById('ntReadout').innerHTML=`
-      <div class="gauge"><div class="gl"><span>Predicted category</span><span class="gv">${tri.cls.confidence}%</span></div>
-        <div class="track"><div class="fill" style="width:${tri.cls.confidence}%"></div></div>
-        <div class="conf-row" style="margin-top:9px">${tri.cls.ranked.map((r,i)=>`<span class="conf-tag">${i===0?'<b>'+r.cat+'</b>':r.cat} ${r.pct}%</span>`).join('')}</div>
-      </div>
-      <div class="gauge"><div class="gl"><span>Priority signal</span><span class="gv" style="color:${priCol}">${tri.pri.level.toUpperCase()}</span></div>
-        <div class="track"><div class="fill" style="width:${tri.pri.score}%;background:linear-gradient(90deg,${priCol}88,${priCol});box-shadow:0 0 12px ${priCol}66"></div></div></div>
-      <div class="conf-row">
-        <span class="conf-tag">Sentiment <b style="color:${sentCol}">${tri.sent.label}</b></span>
-        <span class="conf-tag">Est. resolve <b>${tri.est.hours}h</b></span>
-        <span class="conf-tag">SLA <b>${tri.est.sla}h</b></span>
-      </div>
-      ${tri.sim.length?`<div><div class="gl" style="font-family:var(--f-mono);font-size:10px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:2px">Related cases & articles</div>
-        ${tri.sim.map(x=>`<div class="sim-item"><span class="id">${x.id}</span><span class="mt">${x.label}</span><span class="pct">${Math.round(x.score*100)}%</span></div>`).join('')}</div>`:''}`;
-    setTimeout(()=>{const h=document.querySelector('#ntTriage .live'); if(h)h.innerHTML='<span class="dot"></span>READY';},400);
-  },
-  _create(){
-    const subj=document.getElementById('ntSubject').value.trim();
-    const body=document.getElementById('ntBody').value.trim();
-    if(!subj){ UI.toast('Subject required','Add a short summary','err'); return; }
-    const client=document.getElementById('ntClient').value;
-    const tri=ML.triage(subj,body,clientSla(client));
-    const num=1043+State.tickets.filter(t=>t.id.startsWith('NX-')).length;
-    const t={ id:'NX-'+num, subject:subj, body:body, client, contact:document.getElementById('ntContact').value||'Operations',
-      category:tri.cls.category, priority:document.getElementById('ntPriority').value,
-      status:'open', assignee:document.getElementById('ntAssignee').value, created:Date.now(), updated:Date.now(),
-      sentiment:tri.sent.label, ai_conf:tri.cls.confidence,
-      thread:[{by:document.getElementById('ntContact').value||'Operations', role:'client', at:Date.now(), text:body||subj}],
-      timeline:[{at:Date.now(), text:`Ticket created · AI triaged as ${tri.cls.category} (${tri.cls.confidence}%)`}] };
-    Store.saveTicket(t); UI.closeModal();
-    App.renderSidebar(); State.openTicket=t; App.go('ticket');
-    UI.toast('Ticket created', `${t.id} · triaged as ${tri.cls.category}`, 'ok');
-  },
-  kbArticle(id){
-    const k=KB.find(x=>x.id===id); if(!k)return;
-    UI.modal(`<div class="modal-head"><h3 style="font-size:16px">${k.title}</h3>
-      <button class="x" onclick="UI.closeModal()">${svg(ICON.x)}</button></div>
-      <div class="modal-body">
-        <div class="cat" style="font-family:var(--f-mono);font-size:10.5px;letter-spacing:1.5px;color:var(--teal);text-transform:uppercase">${k.cat} · ${k.id}</div>
-        <p style="margin-top:14px;line-height:1.75;font-size:14px">${k.body}</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:18px">${k.tags.map(t=>`<span class="conf-tag">#${t}</span>`).join('')}</div>
-      </div>
-      <div class="modal-foot"><span class="muted mono" style="font-size:11px;margin-right:auto;align-self:center">${k.views} views · ${k.mins} min read</span>
-        <button class="btn btn-ghost" onclick="UI.closeModal()">Close</button></div>`);
-  }
-};
-
-/* ================================================================
-   CHARTS  (canvas, no dependencies)
-================================================================ */
-const Charts = {
-  _grid(ctx,w,h,pad){ ctx.strokeStyle='#232C3B';ctx.lineWidth=1;
-    for(let i=0;i<=4;i++){const y=pad+(h-2*pad)*i/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();} },
-  _setup(id){ const c=document.getElementById(id); if(!c)return null;
-    const r=window.devicePixelRatio||1; const rect=c.getBoundingClientRect();
-    c.width=rect.width*r; c.height=rect.height*r; const ctx=c.getContext('2d'); ctx.scale(r,r);
-    return {ctx,w:rect.width,h:rect.height}; },
-
-  drawTrend(id){ const s=this._setup(id); if(!s)return; const {ctx,w,h}=s; const pad=14;
-    const data=[3,5,2,6,4,7,5]; const max=Math.max(...data);
-    const grad=ctx.createLinearGradient(0,0,0,h); grad.addColorStop(0,'rgba(45,226,192,.35)');grad.addColorStop(1,'rgba(45,226,192,0)');
-    const pts=data.map((v,i)=>[pad+(w-2*pad)*i/(data.length-1), h-pad-(h-2*pad)*v/max]);
-    ctx.beginPath();ctx.moveTo(pts[0][0],h-pad);pts.forEach(p=>ctx.lineTo(p[0],p[1]));ctx.lineTo(pts[pts.length-1][0],h-pad);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
-    ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.strokeStyle='#2DE2C0';ctx.lineWidth=2.2;ctx.stroke();
-    pts.forEach(p=>{ctx.beginPath();ctx.arc(p[0],p[1],3,0,7);ctx.fillStyle='#2DE2C0';ctx.fill();}); },
-
-  drawVol(){ const s=this._setup('volChart'); if(!s)return; const {ctx,w,h}=s; const pad=24;
-    const data=[4,6,3,7,5,8,6,9,5,7,4,8,6,10]; const max=Math.max(...data);
-    this._grid(ctx,w,h,pad);
-    const bw=(w-2*pad)/data.length*0.55;
-    data.forEach((v,i)=>{const x=pad+(w-2*pad)*(i+0.5)/data.length-bw/2; const bh=(h-2*pad)*v/max;
-      const g=ctx.createLinearGradient(0,h-pad-bh,0,h-pad);g.addColorStop(0,'#2DE2C0');g.addColorStop(1,'#1c8f7d');
-      ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(x,h-pad-bh,bw,bh,3);ctx.fill();}); },
-
-  drawCat(){ const s=this._setup('catChart'); if(!s)return; const {ctx,w,h}=s;
-    const byCat={}; State.tickets.forEach(t=>byCat[t.category]=(byCat[t.category]||0)+1);
-    const entries=Object.entries(byCat); const total=entries.reduce((a,[,v])=>a+v,0);
-    const cols=['#2DE2C0','#3DB9F5','#FF9F40','#FFD23F','#FF4D5E','#36D399','#5B8CFF','#a78bfa'];
-    const cx=w/2,cy=h/2,rO=Math.min(w,h)/2-12,rI=rO*0.6; let a=-Math.PI/2;
-    entries.forEach(([,v],i)=>{const ang=v/total*Math.PI*2;
-      ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,rO,a,a+ang);ctx.closePath();ctx.fillStyle=cols[i%cols.length];ctx.fill();a+=ang;});
-    ctx.beginPath();ctx.arc(cx,cy,rI,0,7);ctx.fillStyle='#131822';ctx.fill();
-    ctx.fillStyle='#E6ECF5';ctx.font='700 22px Chakra Petch';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(total,cx,cy-6);
-    ctx.fillStyle='#8B97AB';ctx.font='500 10px JetBrains Mono';ctx.fillText('TICKETS',cx,cy+12);
-    const leg=document.getElementById('catLegend');
-    if(leg) leg.innerHTML=entries.map(([c,v],i)=>`<span><i style="background:${cols[i%cols.length]}"></i>${c} (${v})</span>`).join(''); },
-
-  drawRes(){ const s=this._setup('resChart'); if(!s)return; const {ctx,w,h}=s; const pad=30;
-    const labels=['Critical','High','Medium','Low']; const data=[3.2,8.5,16,42]; const max=Math.max(...data);
-    const cols=['#FF4D5E','#FF9F40','#FFD23F','#3DB9F5'];
-    this._grid(ctx,w,h,pad);
-    const bw=(w-2*pad)/labels.length*0.5;
-    data.forEach((v,i)=>{const x=pad+(w-2*pad)*(i+0.5)/labels.length-bw/2; const bh=(h-2*pad)*v/max;
-      ctx.fillStyle=cols[i];ctx.beginPath();ctx.roundRect(x,h-pad-bh,bw,bh,4);ctx.fill();
-      ctx.fillStyle='#8B97AB';ctx.font='500 11px JetBrains Mono';ctx.textAlign='center';
-      ctx.fillText(labels[i],x+bw/2,h-pad+15); ctx.fillStyle='#E6ECF5';ctx.fillText(v+'h',x+bw/2,h-pad-bh-7);}); },
-
-  drawAll(){ this.drawVol(); this.drawCat(); this.drawRes(); }
-};
-
-/* ================================================================
-   AI CHATBOT  — KB-retrieval, zero-cost, offline-capable
-================================================================ */
-const Chat = {
-  history:[], open:false,
-  mount(){
-    document.getElementById('chatPanel').innerHTML=`
-      <div class="chat-top"><div class="bot">${svg(ICON.bot)}</div>
-        <div><div class="nm">NEX Assistant</div><div class="stat">Online · trained on your KB</div></div>
-        <button class="x" onclick="Chat.toggle()">${svg(ICON.x)}</button></div>
-      <div class="chat-body" id="chatBody"></div>
-      <div class="quick" id="chatQuick"></div>
-      <div class="chat-input"><input id="chatInput" placeholder="Ask about an issue…" onkeydown="if(event.key==='Enter')Chat.send()">
-        <button onclick="Chat.send()">${svg(ICON.send)}</button></div>`;
-    this.history=[{role:'bot', text:`Hi! I'm the NEXDESK assistant. I can help diagnose PLC, SCADA, network, drive, instrumentation and web-app issues from our knowledge base — or help you log a ticket. What's happening?`}];
-    this.renderHistory(); this.renderQuick(['Siemens PLC in STOP','PROFINET dropping','Web app shows blank screen','How do I create a ticket?']);
-  },
-  toggle(){ this.open=!this.open; document.getElementById('chatPanel').classList.toggle('open',this.open);
-    document.getElementById('chatPing').style.display='none';
-    if(this.open) setTimeout(()=>document.getElementById('chatInput')?.focus(),100); },
-  renderHistory(){ const b=document.getElementById('chatBody');
-    b.innerHTML=this.history.map(m=>`<div class="cmsg ${m.role==='me'?'me':'bot'}">
-      <div class="ic">${svg(m.role==='me'?ICON.user:ICON.bot)}</div><div class="cb">${m.text}</div></div>`).join('');
-    b.scrollTop=b.scrollHeight; },
-  renderQuick(arr){ document.getElementById('chatQuick').innerHTML=arr.map(q=>`<button onclick="Chat.send('${q.replace(/'/g,"\\'")}')">${q}</button>`).join(''); },
-  send(text){ const inp=document.getElementById('chatInput'); const msg=text||inp.value.trim(); if(!msg)return;
-    inp.value=''; this.history.push({role:'me',text:msg}); this.renderHistory(); this.renderQuick([]);
-    // typing indicator
-    const b=document.getElementById('chatBody');
-    b.insertAdjacentHTML('beforeend',`<div class="cmsg bot" id="typing"><div class="ic">${svg(ICON.bot)}</div><div class="cb"><div class="typing"><i></i><i></i><i></i></div></div></div>`);
-    b.scrollTop=b.scrollHeight;
-    setTimeout(()=>{document.getElementById('typing')?.remove();
-      const reply=this.answer(msg); this.history.push({role:'bot',text:reply.text}); this.renderHistory();
-      this.renderQuick(reply.quick||[]);},650+Math.random()*400);
-  },
-  answer(q){
-    const ql=q.toLowerCase();
-    if(/create|log|new ticket|raise|open a ticket/.test(ql))
-      return {text:`To log a ticket, tap <b>New ticket</b> (top right). As you type, the AI triage panel will auto-classify the category, predict priority, and surface related cases. Want me to open it for you?`,
-        quick:['Open new ticket','Show me the queue']};
-    if(/open new ticket/.test(ql)){ setTimeout(()=>{Chat.toggle();App.openNewTicket();},300); return {text:`Opening the new ticket form…`}; }
-    if(/queue|show.*ticket|my tickets/.test(ql)){ setTimeout(()=>{Chat.toggle();App.go('tickets');},300); return {text:`Taking you to the ticket queue.`}; }
-    // KB retrieval via similarity
-    const hits=ML.similar(q,2).filter(h=>h.type==='kb');
-    if(hits.length){
-      const k=KB.find(x=>x.id===hits[0].id);
-      const snippet=k.body.split('. ').slice(0,2).join('. ')+'.';
-      return {text:`Based on our knowledge base — <b>${k.title}</b>:<br><br>${snippet}<br><br><a onclick="Chat.toggle();Modals.kbArticle('${k.id}')">Read the full article →</a>`,
-        quick:hits.slice(1).map(h=>KB.find(x=>x.id===h.id)?.title).filter(Boolean).concat(['Log this as a ticket'])};
+  runTriage(){
+    const title=this.val('f_title'), desc=this.val('f_description');
+    const text=(title+' '+desc).trim();
+    const st=document.getElementById('triageStatus'), stt=document.getElementById('triageStatusText');
+    const body=document.getElementById('triageBody');
+    if(text.length<4){
+      st.classList.remove('ready'); stt.textContent='Standby';
+      body.innerHTML=`<div class="triage-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <div>Start typing an issue title or description — the AI will classify the category, suggest a priority, and surface related cases in real time.</div></div>`;
+      return;
     }
-    // category guess fallback
-    const cls=ML.classify(q);
-    if(cls.confidence>45)
-      return {text:`That sounds like a <b>${cls.category}</b> issue. I don't have an exact article, but I can route this to the right specialist. Would you like to log it as a ticket so an engineer can pick it up?`,
-        quick:['Open new ticket','Browse knowledge base']};
-    return {text:`I can help with PLC, SCADA, network, drive, instrumentation, power and web-app issues, or help you log a ticket. Could you describe the symptom and the equipment or app involved?`,
-      quick:['Siemens PLC in STOP','PROFINET dropping','Web app shows blank screen','Browse knowledge base']};
+    const cls=ML.classify(text), pri=ML.priority(text), sent=ML.sentiment(text);
+    const est=ML.resolveEstimate(pri.level, cls.category), sim=ML.similar(text,3);
+    stt.textContent='Ready';
+
+    // auto-suggest priority unless user picked manually
+    this.aiPriority=pri.level;
+    if(!this.manualPriority) this.setPriority(pri.level, false);
+    document.querySelectorAll('.pri-opt').forEach(el=>el.classList.toggle('ai-pick', el.dataset.p===pri.level));
+
+    const priClass={critical:'crit',high:'high',medium:'medium',low:'low'}[pri.level];
+    const priColor={critical:'var(--crit)',high:'var(--high)',medium:'var(--med)',low:'var(--low)'}[pri.level];
+    const sentColor=sent.label==='Frustrated'?'var(--crit)':sent.label==='Concerned'?'var(--high)':sent.label==='Positive'?'var(--ok)':'var(--muted)';
+
+    body.innerHTML=`
+      <div class="tlabel">Predicted Category <b>${cls.confidence}%</b></div>
+      <div class="conf-bar"><i style="width:${cls.confidence}%"></i></div>
+      <div class="chips" style="margin-top:10px">
+        ${cls.ranked.filter(r=>r.pct>0).map((r,i)=>`<span class="chip ${i===0?'lead':''}">${r.cat} <b>${r.pct}%</b></span>`).join('') || `<span class="chip lead">${cls.category}</span>`}
+      </div>
+
+      <div class="tlabel">Priority Signal <b class="${priClass}">${pri.level.toUpperCase()}</b></div>
+      <div class="sigbar"><i style="width:${pri.score}%;background:${priColor}"></i></div>
+
+      <div class="chips" style="margin-top:14px">
+        <span class="chip">Sentiment <b style="color:${sentColor}">${sent.label}</b></span>
+        <span class="chip">Est. resolve <b>${est.hours}h</b></span>
+        <span class="chip">SLA <b>${est.sla}h</b></span>
+      </div>
+
+      ${sim.length?`<div class="divider"></div>
+        <div class="tlabel">Related Cases &amp; Articles</div>
+        ${sim.map(s=>`<div class="rel"><span class="rid">${s.id}</span><span class="rlabel">${s.label}</span><span class="rpct">${Math.round(s.score*100)}%</span></div>`).join('')}`:''}
+    `;
+  },
+
+  markInvalid(ids){
+    document.querySelectorAll('.field.invalid').forEach(f=>f.classList.remove('invalid'));
+    let first=null;
+    ids.forEach(id=>{ const el=document.getElementById(id); if(el){ el.closest('.field').classList.add('invalid'); if(!first) first=el; } });
+    if(first){ first.focus(); first.scrollIntoView({behavior:'smooth',block:'center'}); }
+  },
+
+  generateRef(){
+    const d=new Date(), p=n=>String(n).padStart(2,'0');
+    const rnd=Math.random().toString(36).substring(2,6).toUpperCase();
+    return 'NX-'+String(d.getFullYear()).slice(-2)+p(d.getMonth()+1)+p(d.getDate())+'-'+rnd;
+  },
+
+  collect(){
+    return {
+      type:'ticket',
+      ticketRef:this.generateRef(),
+      timestamp:new Date().toLocaleString('en-PH'),
+      priority:this.priority.charAt(0).toUpperCase()+this.priority.slice(1),
+      name:this.val('f_name'), company:this.val('f_company'),
+      email:this.val('f_email'), phone:this.val('f_phone'),
+      site:this.val('f_site'), system:this.val('f_system'),
+      product:this.val('f_product'), supportType:this.val('f_supportType'),
+      title:this.val('f_title'), description:this.val('f_description'),
+      stepsTaken:this.val('f_stepsTaken'), source:'Website'
+    };
+  },
+
+  async submit(){
+    const req=[['f_name','name'],['f_company','company'],['f_email','email'],
+      ['f_site','site'],['f_supportType','supportType'],['f_title','title'],['f_description','description']];
+    const missing=req.filter(([id])=>!this.val(id)).map(([id])=>id);
+    const email=this.val('f_email');
+    if(missing.length){ this.markInvalid(missing); this.toast('err','Please complete the required fields.'); return; }
+    if(email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ this.markInvalid(['f_email']); this.toast('err','Please enter a valid email address.'); return; }
+    document.querySelectorAll('.field.invalid').forEach(f=>f.classList.remove('invalid'));
+
+    const payload=this.collect();
+    const btn=document.getElementById('submitBtn');
+    btn.disabled=true; btn.innerHTML=`${ICONS.spinner} Submitting…`;
+
+    let delivered=false;
+    if(CONFIG.TS_SHEETS_URL){
+      try{
+        // Apps Script /exec returns no CORS headers, so we fire the write in
+        // no-cors mode (simple text/plain request → no preflight). The response
+        // is opaque; the ticket ref is generated client-side so we don't need it.
+        await fetch(CONFIG.TS_SHEETS_URL, {
+          method:'POST', mode:'no-cors', redirect:'follow',
+          headers:{'Content-Type':'text/plain;charset=utf-8'},
+          body:JSON.stringify(payload)
+        });
+        delivered=true;
+      }catch(e){ delivered=false; }
+    }
+    this.showSuccess(payload, delivered);
+  },
+
+  showSuccess(t, delivered){
+    const grid=document.getElementById('grid');
+    const cls=ML.classify(t.title+' '+t.description);
+    const mailSubject=encodeURIComponent(`[${t.priority.toUpperCase()}] Support Ticket ${t.ticketRef} — ${t.title}`);
+    const mailBody=encodeURIComponent(
+      `Ticket Ref: ${t.ticketRef}\nPriority: ${t.priority}\nSupport Type: ${t.supportType}\n\n`+
+      `Name: ${t.name}\nCompany: ${t.company}\nEmail: ${t.email}\nPhone: ${t.phone}\n\n`+
+      `Site: ${t.site}\nSystem: ${t.system}\nProduct: ${t.product}\n\n`+
+      `Issue: ${t.title}\n\n${t.description}\n\nSteps already taken:\n${t.stepsTaken||'None specified'}`);
+    const mailto=`mailto:${CONFIG.NOTIFY_EMAIL}?subject=${mailSubject}&body=${mailBody}`;
+
+    grid.innerHTML=`<section class="panel" style="grid-column:1/-1">
+      <div class="success">
+        <div class="ok-ic">${ICONS.ok}</div>
+        <h2>Ticket ${delivered?'Submitted':'Ready to Send'}</h2>
+        <p>${delivered
+          ? 'Your ticket has been logged to NEXARCH Support. An engineer will respond within the SLA window for its priority.'
+          : 'We could not reach the support server right now. Your reference is reserved below — tap “Email this ticket” to send it directly, and we will pick it up.'}</p>
+        <div class="refbox"><span class="k">Reference</span><span class="v">${t.ticketRef}</span></div>
+        <div class="summary">
+          <div class="sr"><span class="sk">Priority</span><span class="sv">${t.priority}</span></div>
+          <div class="sr"><span class="sk">Category (AI)</span><span class="sv">${cls.category}</span></div>
+          <div class="sr"><span class="sk">Support type</span><span class="sv">${t.supportType||'—'}</span></div>
+          <div class="sr"><span class="sk">Company</span><span class="sv">${t.company}</span></div>
+          <div class="sr"><span class="sk">Site</span><span class="sv">${t.site}</span></div>
+        </div>
+        <div class="actions">
+          ${!delivered?`<a class="primary" href="${mailto}">${ICONS.ok} Email this ticket</a>`:''}
+          <button class="${delivered?'primary':'ghost'}" onclick="location.reload()">Raise another ticket</button>
+          <a class="ghost" href="https://resitch-source.github.io/NEXARCH.IO/nexarch-website.html">Back to site</a>
+        </div>
+      </div></section>`;
+    window.scrollTo({top:0,behavior:'smooth'});
+    this.toast(delivered?'ok':'warn', delivered?`Ticket ${t.ticketRef} logged.`:`Ticket ${t.ticketRef} reserved — send by email.`);
+  },
+
+  toast(type,msg){
+    const el=document.getElementById('toast');
+    document.getElementById('toastIc').innerHTML=ICONS[type==='ok'?'ok':type==='warn'?'warn':'err'];
+    document.getElementById('toastMsg').textContent=msg;
+    el.className='toast show '+(type==='ok'?'ok':type==='warn'?'warn':'err');
+    clearTimeout(this._tt); this._tt=setTimeout(()=>el.classList.remove('show'),4200);
   }
 };
-
-/* ================================================================
-   BOOT
-================================================================ */
-window.addEventListener('DOMContentLoaded', ()=>App.init());
-window.addEventListener('resize', ()=>{ if(App.current==='analytics')Charts.drawAll(); if(App.current==='dashboard')Charts.drawTrend('miniTrend'); });
-
 </script>
 </body>
 </html>
